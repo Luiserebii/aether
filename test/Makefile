@@ -9,7 +9,7 @@ LIB_NAME=lib$(LIB).so
 PRG_OUT=test
 
 test: compile
-	LD_LIBRARY_PATH=.. ./$(PRG_OUT)
+	LD_LIBRARY_PATH=~/github/aether/ ./$(PRG_OUT)
 
 compile: aether
 	$(CXX) $(CXXFLAGS) $(C_INCLUDE_FLAGS) ./src/*.cpp $(LINK_FLAGS) -o $(PRG_OUT)
@@ -17,6 +17,5 @@ compile: aether
 aether:
 	cd .. && make
 
-
 clean: 
-	rm $(PRG_OUT) && ./build/*
+	rm $(PRG_OUT) && cd .. && make clean
