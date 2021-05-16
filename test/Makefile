@@ -8,7 +8,9 @@ LIB_NAME=lib$(LIB).so
 
 PRG_OUT=test
 
-test: compile
+test: compile run
+
+run:
 	LD_LIBRARY_PATH=~/github/aether/ ./$(PRG_OUT)
 
 compile: aether

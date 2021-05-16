@@ -1,6 +1,7 @@
 C_INCLUDE_FLAGS=-I./lib/ethash-0.6.0/include -I./lib/C-STL-master/include
 LINK_FLAGS=-lsecp256k1 -lm
-CFLAGS= -g3 -Wall -Wextra -Wvla -shared -fPIC -Wl,-soname,$(LIB_OUT_NAME).$(LIB_VER) $(C_INCLUDE_FLAGS)
+CFLAGS= -g3 -Wall -Wextra -Wvla -shared -fPIC $(C_INCLUDE_FLAGS)
+#-Wl,-soname,$(LIB_OUT_NAME).$(LIB_VER)
 CC=cc
 
 ETHASH_SRC=./lib/ethash-0.6.0/lib/keccak/keccak.c
@@ -15,7 +16,6 @@ compile:
 	$(CC) $(CFLAGS) ./src/**/*.c $(DEP_SRC) $(OBJECT_DEPS) $(LINK_FLAGS) -o $(LIB_OUT_NAME)
 
 static:
-	$(CC) $(CFLAGS) ./src/**/*.c $(DEP_SRC) $(OBJECT_DEPS) $(LINK_FLAGS) -o $(LIB_OUT_NAME)
 
 install: 
 	cp $(LIB_OUT_NAME) /usr/lib
