@@ -1,5 +1,5 @@
-#ifndef MINTH_ETH_H
-#define MINTH_ETH_H
+#ifndef AETHER_ETH_H
+#define AETHER_ETH_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,7 +95,7 @@ void eth_pubkey_khash_eip55addresstostring(char* out, const eth_pubkey_khash* kh
  * The unsigned char* bytes is required to be zero-initialized, otherwise the call
  * to this function will cause a bad write.
  **/
-void minth_util_hexstringtobytes(unsigned char* bytes, const char* b, const char* e);
+void aether_util_hexstringtobytes(unsigned char* bytes, const char* b, const char* e);
 
 /**
  * Writes bytes_sz * 2 + 1 characters to the char string located by out.

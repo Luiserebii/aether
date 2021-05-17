@@ -4,29 +4,29 @@
 #include <aether/eth/rlp-parse.h>
 #include <cstl/algorithm.h>
 
-void minth_rlp_t_parse_rlp_t(struct minth_rlp_t_parsing_data* pd) {
+void aether_rlp_t_parse_rlp_t(struct aether_rlp_t_parsing_data* pd) {
     if(*pd->b == '[') {
         if(pd->e - pd->b == 2) {
             assert(*(pd->e - 1) == ']');
-            pd->token_type = MINTH_RLP_T_LIST_EMPTY_TOKEN;
+            pd->token_type = AETHER_RLP_T_LIST_EMPTY_TOKEN;
         } else {
-            pd->token_type = MINTH_RLP_T_LIST_FULL_TOKEN;
+            pd->token_type = AETHER_RLP_T_LIST_FULL_TOKEN;
         }
     } else if(*pd->b == '0') {
         assert(*(pd->b + 1) == 'x');
         if(pd->e - pd->b == 2) {
             assert(*(pd->e-1) == 'x');
-            pd->token_type = MINTH_RLP_T_BYTE_ARRAY_EMPTY_TOKEN;
+            pd->token_type = AETHER_RLP_T_BYTE_ARRAY_EMPTY_TOKEN;
         } else {
-            pd->token_type = MINTH_RLP_T_BYTE_ARRAY_FULL_TOKEN;
+            pd->token_type = AETHER_RLP_T_BYTE_ARRAY_FULL_TOKEN;
         }
     }
 }
 
-void minth_rlp_t_parse_rlp_t_list_full(struct minth_rlp_t_parsing_data* pd) {
+void aether_rlp_t_parse_rlp_t_list_full(struct aether_rlp_t_parsing_data* pd) {
     ++pd->b;
     --pd->e;
-    pd->token_type = MINTH_RLP_T_LIST_ELEMENTS_TOKEN;
+    pd->token_type = AETHER_RLP_T_LIST_ELEMENTS_TOKEN;
 }
 
 /**
@@ -34,7 +34,7 @@ void minth_rlp_t_parse_rlp_t_list_full(struct minth_rlp_t_parsing_data* pd) {
  * Returns a pointer to the next element after the comma;
  * returns a pointer to the end if it is the last element otherwise.
  */
-const char* minth_rlp_t_parse_rlp_t_elements(struct minth_rlp_t_parsing_data* pd) {
+const char* aether_rlp_t_parse_rlp_t_elements(struct aether_rlp_t_parsing_data* pd) {
     //Skip whitespace
     for(; *pd->b == ' '; ++pd->b)
         ;

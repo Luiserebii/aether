@@ -11,7 +11,7 @@
 /**
  * Changes all characters in str to lowercase.
  **/
-static void minth_util_tolowerstr(char* str) {
+static void aether_util_tolowerstr(char* str) {
     while((*str = tolower(*str)) && ++str)
         ;
 }
@@ -58,7 +58,7 @@ const unsigned char* eth_pubkey_khash_getaddress(const eth_pubkey_khash* kh) {
     return kh->data+12;
 }
 
-static int minth_util_hexchartoi(char c) {
+static int aether_util_hexchartoi(char c) {
     static int hextable[] = {[(unsigned char) '0']=0, [(unsigned char) '1']=1, 
                              [(unsigned char) '2']=2, [(unsigned char) '3']=3, 
                              [(unsigned char) '4']=4, [(unsigned char) '5']=5,
@@ -70,7 +70,7 @@ static int minth_util_hexchartoi(char c) {
     return hextable[(unsigned char) c];
 }
 
-static unsigned char minth_util_hexchartouchar(char c) {
+static unsigned char aether_util_hexchartouchar(char c) {
     static unsigned char hextable[] = {[(unsigned char) '0']=0, [(unsigned char) '1']=1, 
                              [(unsigned char) '2']=2, [(unsigned char) '3']=3, 
                              [(unsigned char) '4']=4, [(unsigned char) '5']=5,
@@ -82,22 +82,22 @@ static unsigned char minth_util_hexchartouchar(char c) {
     return hextable[(unsigned char) c];
 }
 
-void minth_util_hexstringtobytes(unsigned char* bytes, const char* b, const char* e) {
+void aether_util_hexstringtobytes(unsigned char* bytes, const char* b, const char* e) {
     size_t i = 0;
     for(; e - b >= 2; b+=2, ++i) {
-        bytes[i] |= (minth_util_hexchartouchar(*b)) << 4;
-        bytes[i] |= minth_util_hexchartouchar(*(b + 1));
+        bytes[i] |= (aether_util_hexchartouchar(*b)) << 4;
+        bytes[i] |= aether_util_hexchartouchar(*(b + 1));
     }
     if(b != e) {
         //We have an odd number of bytes, write the last one
-        bytes[i] |= (minth_util_hexchartouchar(*b)) << 4;
+        bytes[i] |= (aether_util_hexchartouchar(*b)) << 4;
     }
 }
 
 void eth_pubkey_khash_writeeip55address(FILE* stream, const eth_pubkey_khash* kh) {
     char loweraddr[41];
     eth_util_bytestohexstring(loweraddr, eth_pubkey_khash_getaddress(kh), 20);
-    minth_util_tolowerstr(loweraddr);    
+    aether_util_tolowerstr(loweraddr);    
 
     //Hash the lowercase address
     union ethash_hash256 ehash = ethash_keccak256((unsigned char*) loweraddr, 40);
@@ -107,7 +107,7 @@ void eth_pubkey_khash_writeeip55address(FILE* stream, const eth_pubkey_khash* kh
     //Finally, using the hash, write each char according to EIP-55, checking if
     //the character hex value of the hash is greater than 8
     for(int i = 0; i < 40; ++i) {
-        if(isalpha(loweraddr[i]) && (minth_util_hexchartoi(ehash_digits[i]) >= 0x8)) {
+        if(isalpha(loweraddr[i]) && (aether_util_hexchartoi(ehash_digits[i]) >= 0x8)) {
             putc(toupper(loweraddr[i]), stream);
         } else {
             putc(loweraddr[i], stream);
@@ -117,7 +117,7 @@ void eth_pubkey_khash_writeeip55address(FILE* stream, const eth_pubkey_khash* kh
 
 void eth_pubkey_khash_eip55addresstostring(char* out, const eth_pubkey_khash* kh) {
     eth_util_bytestohexstring(out, eth_pubkey_khash_getaddress(kh), 20);
-    minth_util_tolowerstr(out);
+    aether_util_tolowerstr(out);
 
     //Hash the lowercase address
     union ethash_hash256 ehash = ethash_keccak256((unsigned char*) out, 40);
@@ -125,7 +125,7 @@ void eth_pubkey_khash_eip55addresstostring(char* out, const eth_pubkey_khash* kh
     //Finally, using the hash, write each char according to EIP-55, checking if
     //the character hex value of the hash is greater than 8
     for(int i = 0; i < 40; ++i) {
-        if(isalpha(out[i]) && (minth_util_hexchartoi(ehash.str[i]) >= 0x8)) {
+        if(isalpha(out[i]) && (aether_util_hexchartoi(ehash.str[i]) >= 0x8)) {
             out[i] = toupper(out[i]);
         }
     }

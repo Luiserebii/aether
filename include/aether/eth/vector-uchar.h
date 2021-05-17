@@ -1,5 +1,5 @@
-#ifndef MINTH_VECTOR_UCHAR_H
-#define MINTH_VECTOR_UCHAR_H
+#ifndef AETHER_VECTOR_UCHAR_H
+#define AETHER_VECTOR_UCHAR_H
 
 #ifdef __cplusplus
 extern "C" {

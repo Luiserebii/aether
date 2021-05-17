@@ -1,5 +1,5 @@
-#ifndef MINTH_VECTOR_RLP_T_H
-#define MINTH_VECTOR_RLP_T_H
+#ifndef AETHER_VECTOR_RLP_T_H
+#define AETHER_VECTOR_RLP_T_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,7 +8,7 @@ extern "C" {
 #define CSTL_VECTOR_DECLARE_ONLY
 #include <aether/cstl/vector.h>
 
-declare_vector_class(vector_rlp_t, struct minth_rlp_t)
+declare_vector_class(vector_rlp_t, struct aether_rlp_t)
 
 #ifdef __cplusplus
 }
