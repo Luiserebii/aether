@@ -1,4 +1,4 @@
-CXX_INCLUDE_FLAGS=-I./lib/Catch2-2.13.6/include  -I../include
+CXX_INCLUDE_FLAGS=-I./lib/Catch2-2.13.6/include  -I../build/include
 # LD_LIBRARY_PATH=.. ./$(PRG_OUT)
 CXXFLAGS= -g3 -Wall -Wextra -Wvla $(CXX_INCLUDE_FLAGS)
 CXX=g++

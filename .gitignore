@@ -5,6 +5,3 @@ compile_commands.json
 .clangd/
 test/test
 build
-
-./include/aether/cstl
-
