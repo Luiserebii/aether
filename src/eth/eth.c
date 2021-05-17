@@ -6,7 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "../../include/eth/eth.h"
+#include <aether/eth/eth.h>
 
 /**
  * Changes all characters in str to lowercase.

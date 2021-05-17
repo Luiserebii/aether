@@ -1,8 +1,11 @@
-#include "../../include/eth/rlp-parse.h"
-#include "../../include/eth/rlp.h"
-#include "../../include/eth/vector-rlp-t.h"
+#include <aether/eth/rlp-parse.h>
+#include <aether/eth/rlp.h>
+#include <aether/eth/vector-rlp-t.h>
+
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+#include <assert.h>
 
 void minth_rlp_t_init_list(struct minth_rlp_t* t) {
     vector_rlp_t_init(&t->value.list);

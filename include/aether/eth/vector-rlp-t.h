@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 
-#include <cstl/vector.h>
+#define CSTL_VECTOR_DECLARE_ONLY
+#include <aether/cstl/vector.h>
 
 declare_vector_class(vector_rlp_t, struct minth_rlp_t)
 

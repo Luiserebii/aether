@@ -8,9 +8,6 @@ extern "C" {
 #include "./vector-rlp-t.h"
 #include "./vector-uchar.h"
 #include "./eth.h"
-#include <assert.h>
-#include <math.h>
-#include <cstl/algorithm.h>
 
 enum minth_rlp_t_tag { MINTH_RLP_T_LIST, MINTH_RLP_T_BYTE_ARR };
 

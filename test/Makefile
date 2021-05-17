@@ -1,4 +1,5 @@
-CXX_INCLUDE_FLAGS=-I./lib/Catch2-2.13.6/include -I../lib/C-STL-master/include -I../include
+CXX_INCLUDE_FLAGS=-I./lib/Catch2-2.13.6/include  -I../include
+# LD_LIBRARY_PATH=.. ./$(PRG_OUT)
 CXXFLAGS= -g3 -Wall -Wextra -Wvla $(CXX_INCLUDE_FLAGS)
 CXX=g++
 LINK_FLAGS=-L.. -l$(LIB)

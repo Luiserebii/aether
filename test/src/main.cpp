@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <string.h>
-#include <eth/vector-rlp-t.h>
-#include <eth/rlp.h>
+#include <aether/eth/vector-rlp-t.h>
+#include <aether/eth/rlp.h>
 
 TEST_CASE("ETH Private Key Generation", "[meme]") {
     REQUIRE(1 == 1);
