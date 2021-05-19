@@ -99,6 +99,15 @@ unsigned char ull_big_endian_bytes_size(unsigned long long n) {
 }
 
 /**
+ * Returns the total serialized byte size of the list of RLP items.
+ * Note that if the byte size is over 2^64-1, i.e. the RLP is
+ * invalid in this way, the behavior is undefined.
+ */
+unsigned long long vector_rlp_t_serialized_total_sz(const vector_rlp_t* list) {
+
+}
+
+/**
  * Future note: the below code may break with current vector_uchar: although size_t may be 64 bytes, 
  * systems with a smaller size_t can cause large enough byte arrays to break. Consider an alternate
  * solution for these systems (probably with a value held in unsigned long long int)
@@ -123,11 +132,32 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
             } else {
                 assert(sz < 18446744073709551615U);
                 vector_uchar_push_back(rlp_out, 183U + ull_big_endian_bytes_size(sz));
+                // BELOW LINE NOT GOOD DON'T WRITE DIRECTLY TO CONTAINER THIS WAY
                 write_ull_big_endian_bytes(vector_uchar_begin(rlp_out), sz);
                 vector_uchar_insert_range(rlp_out, vector_uchar_end(rlp_out), vector_uchar_begin(src_bytes), vector_uchar_end(src_bytes));
             }
             break;
         case AETHER_RLP_T_LIST:
+            const vector_rlp_t* list = &t->value.list;
+            const unsigned long long sz = vector_rlp_t_serialized_total_sz(list);
+            if(sz < 56) {
+                vector_uchar_push_back(rlp_out, sz);
+                const struct aether_rlp_t* end = vector_rlp_t_end(&t->value.list);
+                for(const struct aether_rlp_t* item = vector_rlp_t_begin(&t->value.list); item != end; ++item) {
+                    aether_rlp_t_encode(item, rlp_out);
+                }
+            } else {
+                assert(sz < 18446744073709551615U);
+                vector_uchar_push_back(rlp_out, 247U + ull_big_endian_bytes_size(sz));
+                /**
+                 * Double-check vector_uchar_begin(rlp_out) - are you sure you want to write
+                 * to the beginning??? I think you want to write to avail, i.e. the latest;
+                 * requires alternate method
+                 */
+                write_ull_big_endian_bytes(vector_uchar())
+
+                
+            }
             break;
     }
 }
