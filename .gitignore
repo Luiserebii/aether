@@ -3,5 +3,6 @@
 *.so
 compile_commands.json
 .clangd/
+.cache
 test/test
 build
