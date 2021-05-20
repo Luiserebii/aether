@@ -82,8 +82,15 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
     }
 }
 
+// Swaps values
+static void uchar_ptr_swap(unsigned char* first, unsigned char* last) {
+    unsigned char t = *first;
+    *first = *last;
+    *last = t;
+}
+
 // Reverses the bytes from unsigned char* [first, last]
-static unsigned char uchar_arr_reverse(unsigned char* first, unsigned char* last) {
+static void uchar_arr_reverse(unsigned char* first, unsigned char* last) {
     while((first != last) && first != --last) {
         uchar_ptr_swap(first++, last);
     }
@@ -124,10 +131,10 @@ unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_
  * Note that if the byte size is over 2^64-1, i.e. the RLP is
  * invalid in this way, the behavior is undefined.
  */
-unsigned long long vector_rlp_t_serialized_total_sz(const vector_rlp_t* rlp) {
-    switch(t->tag) {
-        case AETHER_RLP_T_BYTE_ARR:
-            const vector_uchar* byte_array = &t->value.byte_array;
+unsigned long long vector_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp) {
+    switch(rlp->tag) {
+        case AETHER_RLP_T_BYTE_ARR: {
+            const vector_uchar* byte_array = &rlp->value.byte_array;
             size_t sz = vector_uchar_size(byte_array);
             if(sz == 1 && *(vector_uchar_begin(byte_array)) < 128U) {
                 return 1;
@@ -138,14 +145,19 @@ unsigned long long vector_rlp_t_serialized_total_sz(const vector_rlp_t* rlp) {
                 return sz + 1 + big_endian_bytes_size(sz);
             }
             break;
-        case AETHER_RLP_T_LIST:
-            const vector_rlp_t* list = &t->value.list;
-            size_t sz = vector_rlp_t_list_items_serialized_total_sz(rlp);
+        }
+        case AETHER_RLP_T_LIST: {
+            const vector_rlp_t* list = &rlp->value.list;
+            size_t sz = vector_rlp_t_list_items_serialized_total_sz(list);
             if(sz < 56) {
                 return sz + 1;
             } else {
                 return sz + 1 + big_endian_bytes_size(sz);
             }
+            break;
+        }
+        default:
+            assert(0);
             break;
     }
 }
@@ -161,7 +173,7 @@ unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_
     //Count serializations
     const struct aether_rlp_t* end = vector_rlp_t_end(list);
     for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
-        sz += vector_rlp_t_serialized_total_sz(rlp);
+        sz += vector_rlp_t_serialized_total_sz(item);
     }
     return sz;
 }
@@ -185,7 +197,7 @@ unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_
  */
 void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
     switch(t->tag) {
-        case AETHER_RLP_T_BYTE_ARR: 
+        case AETHER_RLP_T_BYTE_ARR: {
             const vector_uchar* src_bytes = &t->value.byte_array;
             size_t sz = vector_uchar_size(src_bytes);
             if(sz == 1 && *(vector_uchar_begin(src_bytes)) < 128U) {
@@ -200,7 +212,8 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
                 vector_uchar_insert_range(rlp_out, vector_uchar_end(rlp_out), vector_uchar_begin(src_bytes), vector_uchar_end(src_bytes));
             }
             break;
-        case AETHER_RLP_T_LIST:
+        }
+        case AETHER_RLP_T_LIST: {
             const vector_rlp_t* list = &t->value.list;
             const unsigned long long sz = vector_rlp_t_list_items_serialized_total_sz(list);
             if(sz < 56) {
@@ -219,6 +232,7 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
                 }
             }
             break;
+        }
     }
 }
 
