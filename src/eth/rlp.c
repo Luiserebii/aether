@@ -86,7 +86,7 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
  * Writes n as a big endian integer across the byte array of out.
  * 8 bits are written across each element of the byte array.
  */
-void write_ull_big_endian_bytes(unsigned char* out, unsigned long long n) {
+void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long n) {
     
 }
 
@@ -94,7 +94,7 @@ void write_ull_big_endian_bytes(unsigned char* out, unsigned long long n) {
  * Returns the number of bytes required to encode the length of n,
  * encoded as a big endian integer across an 8-bit byte array.
  */
-unsigned char ull_big_endian_bytes_size(unsigned long long n) {
+unsigned char big_endian_bytes_size(unsigned long long n) {
 
 }
 
@@ -118,6 +118,11 @@ unsigned long long vector_rlp_t_serialized_total_sz(const vector_rlp_t* list) {
  *    •If the byte array contains solely a single byte and that single byte is less than 128, then the input is exactly equal to the output.
  *    •If the byte array contains fewer than 56 bytes, then the output is equal to the input prefixed by the byte equal to the length of the byte array plus 128.
  *    •Otherwise, the output is equal to the input, provided that it contains fewer than 2^64 bytes, prefixed by the minimal-length byte array which when interpreted as a big-endian integer is equal to the length of the input byte array, which is itself prefixed by the number of bytes required to faithfully encode this length value plus 183.
+ *
+ * If instead, the value to be serialised is a sequence of other items then the RLP serialisation takes one of two forms:
+ *    •If the concatenated serialisations of each contained item is less than 56 bytes in length, then the output is equal to that concatenation prefixed by the byte equal to the length of this byte array plus 192.
+ *    •Otherwise, the output is equal to the concatenated serialisations, provided that they contain fewer than 2^64 bytes, prefixed by the minimal-length byte array which when interpreted as a big-endian integer is equal to the length of the concatenated serialisations byte array, which is itself prefixed by the number of bytes required to faithfully encode this length value plus 247.
+ *
  */
 void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
     switch(t->tag) {
@@ -131,9 +136,8 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
                 vector_uchar_insert_range(rlp_out, vector_uchar_end(rlp_out), vector_uchar_begin(src_bytes), vector_uchar_end(src_bytes));
             } else {
                 assert(sz < 18446744073709551615U);
-                vector_uchar_push_back(rlp_out, 183U + ull_big_endian_bytes_size(sz));
-                // BELOW LINE NOT GOOD DON'T WRITE DIRECTLY TO CONTAINER THIS WAY
-                write_ull_big_endian_bytes(vector_uchar_begin(rlp_out), sz);
+                vector_uchar_push_back(rlp_out, 183U + big_endian_bytes_size(sz));
+                vector_uchar_insert_big_endian_bytes(rlp_out, sz);
                 vector_uchar_insert_range(rlp_out, vector_uchar_end(rlp_out), vector_uchar_begin(src_bytes), vector_uchar_end(src_bytes));
             }
             break;
@@ -141,22 +145,19 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
             const vector_rlp_t* list = &t->value.list;
             const unsigned long long sz = vector_rlp_t_serialized_total_sz(list);
             if(sz < 56) {
-                vector_uchar_push_back(rlp_out, sz);
-                const struct aether_rlp_t* end = vector_rlp_t_end(&t->value.list);
-                for(const struct aether_rlp_t* item = vector_rlp_t_begin(&t->value.list); item != end; ++item) {
+                vector_uchar_push_back(rlp_out, 192U + sz);
+                const struct aether_rlp_t* end = vector_rlp_t_end(list);
+                for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
                     aether_rlp_t_encode(item, rlp_out);
                 }
             } else {
                 assert(sz < 18446744073709551615U);
-                vector_uchar_push_back(rlp_out, 247U + ull_big_endian_bytes_size(sz));
-                /**
-                 * Double-check vector_uchar_begin(rlp_out) - are you sure you want to write
-                 * to the beginning??? I think you want to write to avail, i.e. the latest;
-                 * requires alternate method
-                 */
-                write_ull_big_endian_bytes(vector_uchar())
-
-                
+                vector_uchar_push_back(rlp_out, 247U + big_endian_bytes_size(sz));
+                vector_uchar_insert_big_endian_bytes(rlp_out, sz);
+                const struct aether_rlp_t* end = vector_rlp_t_end(list);
+                for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
+                    aether_rlp_t_encode(item, rlp_out);
+                }
             }
             break;
     }
