@@ -115,8 +115,12 @@ unsigned char big_endian_bytes_size(unsigned long long n) {
     return cnt;
 }
 
+// TODO: MOVE TO HEADER 
+unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list);
+
 /**
  * Returns the total serialized byte size of the RLP_T.
+ *
  * Note that if the byte size is over 2^64-1, i.e. the RLP is
  * invalid in this way, the behavior is undefined.
  */
@@ -136,12 +140,7 @@ unsigned long long vector_rlp_t_serialized_total_sz(const vector_rlp_t* rlp) {
             break;
         case AETHER_RLP_T_LIST:
             const vector_rlp_t* list = &t->value.list;
-            size_t sz = 0;
-            //Count serializations
-            const struct aether_rlp_t* end = vector_rlp_t_end(list);
-            for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
-                sz += vector_rlp_t_serialized_total_sz(rlp);
-            }
+            size_t sz = vector_rlp_t_list_items_serialized_total_sz(rlp);
             if(sz < 56) {
                 return sz + 1;
             } else {
@@ -149,6 +148,22 @@ unsigned long long vector_rlp_t_serialized_total_sz(const vector_rlp_t* rlp) {
             }
             break;
     }
+}
+
+/**
+ * Returns the total serialized byte size of the RLP list items.
+ *
+ * Note that if the byte size is over 2^64-1, i.e. the RLP is
+ * invalid in this way, the behavior is undefined.
+ */
+unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list) {
+    size_t sz = 0;
+    //Count serializations
+    const struct aether_rlp_t* end = vector_rlp_t_end(list);
+    for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
+        sz += vector_rlp_t_serialized_total_sz(rlp);
+    }
+    return sz;
 }
 
 /**
@@ -187,7 +202,7 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
             break;
         case AETHER_RLP_T_LIST:
             const vector_rlp_t* list = &t->value.list;
-            const unsigned long long sz = vector_rlp_t_serialized_total_sz(list);
+            const unsigned long long sz = vector_rlp_t_list_items_serialized_total_sz(list);
             if(sz < 56) {
                 vector_uchar_push_back(rlp_out, 192U + sz);
                 const struct aether_rlp_t* end = vector_rlp_t_end(list);
