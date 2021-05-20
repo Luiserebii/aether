@@ -82,12 +82,25 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
     }
 }
 
+// Reverses the bytes from unsigned char* [first, last]
+static unsigned char uchar_arr_reverse(unsigned char* first, unsigned char* last) {
+    while((first != last) && first != --last) {
+        uchar_ptr_swap(first++, last);
+    }
+}
+
 /**
- * Writes n as a big endian integer across the byte array of out.
- * 8 bits are written across each element of the byte array.
+ * Writes n as a big endian integer appended to vector_uchar* out.
+ * 8 bits are written across each element of the vector.
  */
 void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long n) {
-    
+    //Size and not pointer, as pointer could be invalidated if reallocated
+    //on push_back!
+    size_t sz = vector_uchar_size(out);
+    for(; n > 0x0; n >>= 8) {
+        vector_uchar_push_back(out, n & 0xFF);
+    }
+    uchar_arr_reverse(vector_uchar_begin(out) + sz, vector_uchar_end(out));
 }
 
 /**
@@ -95,7 +108,11 @@ void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long 
  * encoded as a big endian integer across an 8-bit byte array.
  */
 unsigned char big_endian_bytes_size(unsigned long long n) {
-
+    unsigned long long cnt = 0;
+    for(; n > 0x0; ++cnt) {
+        n >>= 8;
+    }
+    return cnt;
 }
 
 /**
