@@ -116,12 +116,39 @@ unsigned char big_endian_bytes_size(unsigned long long n) {
 }
 
 /**
- * Returns the total serialized byte size of the list of RLP items.
+ * Returns the total serialized byte size of the RLP_T.
  * Note that if the byte size is over 2^64-1, i.e. the RLP is
  * invalid in this way, the behavior is undefined.
  */
-unsigned long long vector_rlp_t_serialized_total_sz(const vector_rlp_t* list) {
-
+unsigned long long vector_rlp_t_serialized_total_sz(const vector_rlp_t* rlp) {
+    switch(t->tag) {
+        case AETHER_RLP_T_BYTE_ARR:
+            const vector_uchar* byte_array = &t->value.byte_array;
+            size_t sz = vector_uchar_size(byte_array);
+            if(sz == 1 && *(vector_uchar_begin(byte_array)) < 128U) {
+                return 1;
+            } else if(sz < 56) {
+                return sz + 1;
+            } else {
+                assert(sz < 18446744073709551615U);
+                return sz + 1 + big_endian_bytes_size(sz);
+            }
+            break;
+        case AETHER_RLP_T_LIST:
+            const vector_rlp_t* list = &t->value.list;
+            size_t sz = 0;
+            //Count serializations
+            const struct aether_rlp_t* end = vector_rlp_t_end(list);
+            for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
+                sz += vector_rlp_t_serialized_total_sz(rlp);
+            }
+            if(sz < 56) {
+                return sz + 1;
+            } else {
+                return sz + 1 + big_endian_bytes_size(sz);
+            }
+            break;
+    }
 }
 
 /**
