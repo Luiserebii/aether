@@ -205,13 +205,45 @@ TEST_CASE("Testing RLP Encoding", "[rlp_encoding]") {
     struct aether_rlp_t rlp;
     vector_uchar encoding;
 
-    SECTION("0x (empty byte array)") {
-        aether_rlp_t_init_from_string(&rlp, "0x1AF24828FC382D1AA");
+    SECTION("0x0") {
+        aether_rlp_t_init_from_string(&rlp, "0x0");
         vector_uchar_init(&encoding);
         aether_rlp_t_encode(&rlp, &encoding);
-        for(auto i = vector_uchar_begin(&encoding); i != vector_uchar_end(&encoding); ++i) {
-            printf("%x", *i);
-        }
-        putchar('\n');
+
+        unsigned char e[] = {0x0};
+
+        REQUIRE(vector_uchar_size(&encoding) == 1);
+        REQUIRE(memcmp(vector_uchar_begin(&encoding), e, 1) == 0);
+
+        aether_rlp_t_deinit(&rlp);
+        vector_uchar_deinit(&encoding);
+    }
+
+    SECTION("0x1F") {
+        aether_rlp_t_init_from_string(&rlp, "0x1F");
+        vector_uchar_init(&encoding);
+        aether_rlp_t_encode(&rlp, &encoding);
+        
+        unsigned char e[] = {0x1F};
+
+        REQUIRE(vector_uchar_size(&encoding) == 1);
+        REQUIRE(memcmp(vector_uchar_begin(&encoding), e, 1) == 0);
+
+        aether_rlp_t_deinit(&rlp);
+        vector_uchar_deinit(&encoding);
+    }
+
+    SECTION("0x7F") {
+        aether_rlp_t_init_from_string(&rlp, "0x7F");
+        vector_uchar_init(&encoding);
+        aether_rlp_t_encode(&rlp, &encoding);
+
+        unsigned char e[] = {0x7F};
+
+        REQUIRE(vector_uchar_size(&encoding) == 1);
+        REQUIRE(memcmp(vector_uchar_begin(&encoding), e, 1) == 0);
+
+        aether_rlp_t_deinit(&rlp);
+        vector_uchar_deinit(&encoding);
     }
 }
