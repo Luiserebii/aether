@@ -199,3 +199,19 @@ TEST_CASE("Testing Struct RLP_T", "[rlp_t]") {
     }
 
 }
+
+
+TEST_CASE("Testing RLP Encoding", "[rlp_encoding]") {
+    struct aether_rlp_t rlp;
+    vector_uchar encoding;
+
+    SECTION("0x (empty byte array)") {
+        aether_rlp_t_init_from_string(&rlp, "0x1AF24828FC382D1AA");
+        vector_uchar_init(&encoding);
+        aether_rlp_t_encode(&rlp, &encoding);
+        for(auto i = vector_uchar_begin(&encoding); i != vector_uchar_end(&encoding); ++i) {
+            printf("%x", *i);
+        }
+        putchar('\n');
+    }
+}

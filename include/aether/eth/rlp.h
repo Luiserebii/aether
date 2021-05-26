@@ -78,6 +78,19 @@ void aether_rlp_t_init_from_string(struct aether_rlp_t* t, const char* rlp_str);
 void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp_str_b, const char* rlp_str_e);
 
 /**
+ * If the value to be serialised is a byte array, the RLP serialisation takes one of three forms:
+ *    •If the byte array contains solely a single byte and that single byte is less than 128, then the input is exactly equal to the output.
+ *    •If the byte array contains fewer than 56 bytes, then the output is equal to the input prefixed by the byte equal to the length of the byte array plus 128.
+ *    •Otherwise, the output is equal to the input, provided that it contains fewer than 2^64 bytes, prefixed by the minimal-length byte array which when interpreted as a big-endian integer is equal to the length of the input byte array, which is itself prefixed by the number of bytes required to faithfully encode this length value plus 183.
+ *
+ * If instead, the value to be serialised is a sequence of other items then the RLP serialisation takes one of two forms:
+ *    •If the concatenated serialisations of each contained item is less than 56 bytes in length, then the output is equal to that concatenation prefixed by the byte equal to the length of this byte array plus 192.
+ *    •Otherwise, the output is equal to the concatenated serialisations, provided that they contain fewer than 2^64 bytes, prefixed by the minimal-length byte array which when interpreted as a big-endian integer is equal to the length of the concatenated serialisations byte array, which is itself prefixed by the number of bytes required to faithfully encode this length value plus 247.
+ *
+ */
+void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out);
+
+/**
  * Deinitializes a aether_rlp_t, recursively calling it if needed.
  */
 void aether_rlp_t_deinit(struct aether_rlp_t* t);
