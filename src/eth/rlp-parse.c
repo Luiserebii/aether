@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include <aether/eth/rlp-parse.h>
 #include <cstl/algorithm.h>
@@ -12,14 +13,15 @@ void aether_rlp_t_parse_rlp_t(struct aether_rlp_t_parsing_data* pd) {
         } else {
             pd->token_type = AETHER_RLP_T_LIST_FULL_TOKEN;
         }
-    } else if(*pd->b == '0') {
-        assert(*(pd->b + 1) == 'x');
+    } else if(*pd->b == '0' && *(pd->b + 1) == 'x') {
         if(pd->e - pd->b == 2) {
             assert(*(pd->e-1) == 'x');
             pd->token_type = AETHER_RLP_T_BYTE_ARRAY_EMPTY_TOKEN;
         } else {
             pd->token_type = AETHER_RLP_T_BYTE_ARRAY_FULL_TOKEN;
         }
+    } else if(isdigit(*pd->b)) {
+        pd->token_type = AETHER_RLP_T_SCALAR_TOKEN;
     }
 }
 

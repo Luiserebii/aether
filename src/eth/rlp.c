@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <ctype.h>
 
 void aether_rlp_t_init_list(struct aether_rlp_t* t) {
     vector_rlp_t_init(&t->value.list);
@@ -28,6 +29,15 @@ void aether_rlp_t_init_byte_array_range(struct aether_rlp_t* t, const unsigned c
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
 
+unsigned long long aether_util_scalarstring_to_ull(const char* first, const char* end) {
+    unsigned long long n = 0;
+    for(; first != end; n *= 10, --end) {
+        assert(isdigit(*(end - 1)));
+        n += *(end - 1) - '0';
+    }
+    return n;
+}
+
 void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* first, const char* last) {
     //Calculate amount of space needed and initialize
     //This is probably a better fit for a function of vector_uchar
@@ -35,6 +45,17 @@ void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* 
     vector_uchar_init_size(&t->value.byte_array, sz);
     memset(t->value.byte_array.head, 0, sz);
     aether_util_hexstringtobytes(t->value.byte_array.head, first, last);
+    t->tag = AETHER_RLP_T_BYTE_ARR;
+}
+
+void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const char* first, const char* last) {
+    //Calculate amount of space needed and initialize
+    //This is probably a better fit for a function of vector_uchar
+    unsigned long long n = aether_util_scalarstring_to_ull(first, last);
+    size_t sz = ceil(((double)(last-first)/2));
+    vector_uchar_init_size(&t->value.byte_array, sz);
+    memset(t->value.byte_array.head, 0, sz);
+    aether_util_scalarstringtobytes(t->value.byte_array.head, first, last);
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
 
@@ -75,6 +96,9 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
                     pd.e = end;
                 }
             }
+            break;
+        case AETHER_RLP_T_SCALAR_TOKEN:
+            aether_rlp_t_init_byte_array_scalarstring(t, pd.b, pd.e);
             break;
         default:
             assert(0);
