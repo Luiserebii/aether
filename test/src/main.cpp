@@ -32,6 +32,33 @@ TEST_CASE("Testing Struct RLP_T", "[rlp_t]") {
         aether_rlp_t_deinit(&rlp);
     }
 
+    SECTION("0 (the scalar value integer 0)") {
+        aether_rlp_t_init_from_string(&rlp, "0");
+        unsigned char b[] = {0x80};
+
+        REQUIRE(rlp.tag == AETHER_RLP_T_BYTE_ARR);
+        REQUIRE(vector_uchar_size(&rlp.value.byte_array) == 1);
+        REQUIRE(memcmp(vector_uchar_begin(&rlp.value.byte_array), b, 1) == 0);
+    }
+
+    SECTION("430 (a valid scalar)") {
+        aether_rlp_t_init_from_string(&rlp, "430");
+        unsigned char b[] = {0x01, 0xAE};
+
+        REQUIRE(rlp.tag == AETHER_RLP_T_BYTE_ARR);
+        REQUIRE(vector_uchar_size(&rlp.value.byte_array) == 2);
+        REQUIRE(memcmp(vector_uchar_begin(&rlp.value.byte_array), b, 2) == 0);
+    }
+
+    SECTION("5907967 (a valid scalar)") {
+        aether_rlp_t_init_from_string(&rlp, "5907967");
+        unsigned char b[] = {0x5A, 0x25, 0xFF};
+
+        REQUIRE(rlp.tag == AETHER_RLP_T_BYTE_ARR);
+        REQUIRE(vector_uchar_size(&rlp.value.byte_array) == 3);
+        REQUIRE(memcmp(vector_uchar_begin(&rlp.value.byte_array), b, 3) == 0);
+    }
+
     SECTION("[] (empty list)") {
         aether_rlp_t_init_from_string(&rlp, "[]");
 

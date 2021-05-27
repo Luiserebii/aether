@@ -49,6 +49,9 @@ void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* 
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
 
+// TODO: MOVE TO HEADER
+void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long n);
+
 void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const char* first, const char* last) {
     unsigned long long n = aether_util_scalarstring_to_ull(first, last);
     if(!n) {

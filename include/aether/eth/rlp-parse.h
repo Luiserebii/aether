@@ -30,7 +30,8 @@ enum aether_rlp_t_parsing_token_type { AETHER_RLP_T_LIST_EMPTY_TOKEN, AETHER_RLP
                                         AETHER_RLP_T_BYTE_ARRAY_EMPTY_TOKEN, 
                                         AETHER_RLP_T_BYTE_ARRAY_FULL_TOKEN,
                                         AETHER_RLP_T_LIST_ELEMENTS_TOKEN,
-                                        AETHER_RLP_T_LIST_ELEMENT_TOKEN };
+                                        AETHER_RLP_T_LIST_ELEMENT_TOKEN,
+                                        AETHER_RLP_T_SCALAR_TOKEN };
 /**
  * A struct meant to shuffle data around containing valid parsed RLP tokens.
  *
