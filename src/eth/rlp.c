@@ -31,9 +31,10 @@ void aether_rlp_t_init_byte_array_range(struct aether_rlp_t* t, const unsigned c
 
 unsigned long long aether_util_scalarstring_to_ull(const char* first, const char* end) {
     unsigned long long n = 0;
-    for(; first != end; n *= 10, --end) {
+    unsigned long long mult = 1;
+    for(; first != end ; mult *= 10, --end) {
         assert(isdigit(*(end - 1)));
-        n += *(end - 1) - '0';
+        n += (*(end - 1) - '0') * mult;
     }
     return n;
 }
@@ -49,13 +50,14 @@ void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* 
 }
 
 void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const char* first, const char* last) {
-    //Calculate amount of space needed and initialize
-    //This is probably a better fit for a function of vector_uchar
     unsigned long long n = aether_util_scalarstring_to_ull(first, last);
-    size_t sz = ceil(((double)(last-first)/2));
-    vector_uchar_init_size(&t->value.byte_array, sz);
-    memset(t->value.byte_array.head, 0, sz);
-    aether_util_scalarstringtobytes(t->value.byte_array.head, first, last);
+    if(!n) {
+        vector_uchar_init_size(&t->value.byte_array, 1);
+        *(vector_uchar_begin(&t->value.byte_array)) = 128U;
+    } else {
+        vector_uchar_init(&t->value.byte_array);
+        vector_uchar_insert_big_endian_bytes(&t->value.byte_array, n);
+    }
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
 
