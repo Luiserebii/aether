@@ -13,7 +13,7 @@ LIB_OUT=aether
 LIB_OUT_NAME=lib$(LIB_OUT).so
 
 compile: setup
-	$(CC) $(CFLAGS) ./src/**/*.c $(DEP_SRC) $(LINK_FLAGS) -o $(LIB_OUT_NAME)
+	$(CC) $(CFLAGS) ./src/*.c $(DEP_SRC) $(LINK_FLAGS) -o $(LIB_OUT_NAME)
 
 static:
 
