@@ -4,17 +4,9 @@
 
 #include <assert.h>
 #include <string.h>
-#include <ctype.h>
 
-#include <aether/eth/eth.h>
-
-/**
- * Changes all characters in str to lowercase.
- **/
-static void aether_util_tolowerstr(char* str) {
-    while((*str = tolower(*str)) && ++str)
-        ;
-}
+#include <aether/eth.h>
+#include <aether/util.h>
 
 unsigned char* eth_secp256k1_randseckey(eth_secp256k1_seckey* sk) {
     //Fill our raw buffer with CSPRNG bytes from /dev/urandom
