@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <assert.h>
 
 void aether_util_tolowerstr(char* str) {
     while((*str = tolower(*str)) && ++str)
@@ -61,5 +62,35 @@ void aether_util_writebytestohex(FILE* stream, const unsigned char* bytes, size_
         putc(hextable[(bytes[i] >> 4) & 0xF], stream);
         putc(hextable[bytes[i] & 0xF], stream);
     }
+}
+
+unsigned long long aether_util_scalarstring_to_ull(const char* first, const char* end) {
+    unsigned long long n = 0;
+    unsigned long long mult = 1;
+    for(; first != end ; mult *= 10, --end) {
+        assert(isdigit(*(end - 1)));
+        n += (*(end - 1) - '0') * mult;
+    }
+    return n;
+}
+
+void aether_util_uchar_ptr_swap(unsigned char* first, unsigned char* last) {
+    unsigned char t = *first;
+    *first = *last;
+    *last = t;
+}
+
+void aether_util_uchar_arr_reverse(unsigned char* first, unsigned char* last) {
+    while((first != last) && first != --last) {
+        aether_util_uchar_ptr_swap(first++, last);
+    }
+}
+
+unsigned char aether_util_big_endian_bytes_size(unsigned long long n) {
+    unsigned long long cnt = 0;
+    for(; n > 0x0; ++cnt) {
+        n >>= 8;
+    }
+    return cnt;
 }
 

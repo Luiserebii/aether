@@ -1,7 +1,8 @@
-#include <aether/eth/rlp-parse.h>
-#include <aether/eth/rlp.h>
-#include <aether/eth/vector-rlp-t.h>
-#include <aether/eth/vector-uchar.h>
+#include <aether/rlp-parse.h>
+#include <aether/rlp.h>
+#include <aether/vector-rlp-t.h>
+#include <aether/vector-uchar.h>
+#include <aether/util.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -29,16 +30,6 @@ void aether_rlp_t_init_byte_array_range(struct aether_rlp_t* t, const unsigned c
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
 
-unsigned long long aether_util_scalarstring_to_ull(const char* first, const char* end) {
-    unsigned long long n = 0;
-    unsigned long long mult = 1;
-    for(; first != end ; mult *= 10, --end) {
-        assert(isdigit(*(end - 1)));
-        n += (*(end - 1) - '0') * mult;
-    }
-    return n;
-}
-
 void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* first, const char* last) {
     //Calculate amount of space needed and initialize
     //This is probably a better fit for a function of vector_uchar
@@ -48,9 +39,6 @@ void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* 
     aether_util_hexstringtobytes(t->value.byte_array.head, first, last);
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
-
-// TODO: MOVE TO HEADER
-void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long n);
 
 void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const char* first, const char* last) {
     unsigned long long n = aether_util_scalarstring_to_ull(first, last);
@@ -111,56 +99,7 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
     }
 }
 
-// Swaps values
-static void uchar_ptr_swap(unsigned char* first, unsigned char* last) {
-    unsigned char t = *first;
-    *first = *last;
-    *last = t;
-}
-
-// Reverses the bytes from unsigned char* [first, last]
-static void uchar_arr_reverse(unsigned char* first, unsigned char* last) {
-    while((first != last) && first != --last) {
-        uchar_ptr_swap(first++, last);
-    }
-}
-
-/**
- * Writes n as a big endian integer appended to vector_uchar* out.
- * 8 bits are written across each element of the vector.
- */
-void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long n) {
-    //Size and not pointer, as pointer could be invalidated if reallocated
-    //on push_back!
-    size_t sz = vector_uchar_size(out);
-    for(; n > 0x0; n >>= 8) {
-        vector_uchar_push_back(out, n & 0xFF);
-    }
-    uchar_arr_reverse(vector_uchar_begin(out) + sz, vector_uchar_end(out));
-}
-
-/**
- * Returns the number of bytes required to encode the length of n,
- * encoded as a big endian integer across an 8-bit byte array.
- */
-unsigned char big_endian_bytes_size(unsigned long long n) {
-    unsigned long long cnt = 0;
-    for(; n > 0x0; ++cnt) {
-        n >>= 8;
-    }
-    return cnt;
-}
-
-// TODO: MOVE TO HEADER 
-unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list);
-
-/**
- * Returns the total serialized byte size of the RLP_T.
- *
- * Note that if the byte size is over 2^64-1, i.e. the RLP is
- * invalid in this way, the behavior is undefined.
- */
-unsigned long long vector_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp) {
+unsigned long long aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp) {
     switch(rlp->tag) {
         case AETHER_RLP_T_BYTE_ARR: {
             const vector_uchar* byte_array = &rlp->value.byte_array;
@@ -171,7 +110,7 @@ unsigned long long vector_rlp_t_serialized_total_sz(const struct aether_rlp_t* r
                 return sz + 1;
             } else {
                 assert(sz < 18446744073709551615U);
-                return sz + 1 + big_endian_bytes_size(sz);
+                return sz + 1 + aether_util_big_endian_bytes_size(sz);
             }
             break;
         }
@@ -181,7 +120,7 @@ unsigned long long vector_rlp_t_serialized_total_sz(const struct aether_rlp_t* r
             if(sz < 56) {
                 return sz + 1;
             } else {
-                return sz + 1 + big_endian_bytes_size(sz);
+                return sz + 1 + aether_util_big_endian_bytes_size(sz);
             }
             break;
         }
@@ -189,22 +128,6 @@ unsigned long long vector_rlp_t_serialized_total_sz(const struct aether_rlp_t* r
             assert(0);
             break;
     }
-}
-
-/**
- * Returns the total serialized byte size of the RLP list items.
- *
- * Note that if the byte size is over 2^64-1, i.e. the RLP is
- * invalid in this way, the behavior is undefined.
- */
-unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list) {
-    size_t sz = 0;
-    //Count serializations
-    const struct aether_rlp_t* end = vector_rlp_t_end(list);
-    for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
-        sz += vector_rlp_t_serialized_total_sz(item);
-    }
-    return sz;
 }
 
 /**
@@ -236,7 +159,7 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
                 vector_uchar_insert_range(rlp_out, vector_uchar_end(rlp_out), vector_uchar_begin(src_bytes), vector_uchar_end(src_bytes));
             } else {
                 assert(sz < 18446744073709551615U);
-                vector_uchar_push_back(rlp_out, 183U + big_endian_bytes_size(sz));
+                vector_uchar_push_back(rlp_out, 183U + aether_util_big_endian_bytes_size(sz));
                 vector_uchar_insert_big_endian_bytes(rlp_out, sz);
                 vector_uchar_insert_range(rlp_out, vector_uchar_end(rlp_out), vector_uchar_begin(src_bytes), vector_uchar_end(src_bytes));
             }
@@ -253,7 +176,7 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
                 }
             } else {
                 assert(sz < 18446744073709551615U);
-                vector_uchar_push_back(rlp_out, 247U + big_endian_bytes_size(sz));
+                vector_uchar_push_back(rlp_out, 247U + aether_util_big_endian_bytes_size(sz));
                 vector_uchar_insert_big_endian_bytes(rlp_out, sz);
                 const struct aether_rlp_t* end = vector_rlp_t_end(list);
                 for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
@@ -281,3 +204,28 @@ void aether_rlp_t_deinit(struct aether_rlp_t* t) {
         }
     }
 }
+
+/*********************************
+ * rlp_t member helper functions
+ *********************************/
+
+void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long n) {
+    //Size and not pointer, as pointer could be invalidated if reallocated
+    //on push_back!
+    size_t sz = vector_uchar_size(out);
+    for(; n > 0x0; n >>= 8) {
+        vector_uchar_push_back(out, n & 0xFF);
+    }
+    aether_util_uchar_arr_reverse(vector_uchar_begin(out) + sz, vector_uchar_end(out));
+}
+
+unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list) {
+    size_t sz = 0;
+    //Count serializations
+    const struct aether_rlp_t* end = vector_rlp_t_end(list);
+    for(const struct aether_rlp_t* item = vector_rlp_t_begin(list); item != end; ++item) {
+        sz += aether_rlp_t_serialized_total_sz(item);
+    }
+    return sz;
+}
+

@@ -55,6 +55,28 @@ char* aether_util_bytestohexstring(char* out, const unsigned char* bytes, size_t
  */
 void aether_util_writebytestohex(FILE* stream, const unsigned char* bytes, size_t bytes_sz);
 
+/**
+ * Reads the characters within [first, end) and returns the unsigned 64-bit
+ * value there as an unsigned long long.
+ */
+unsigned long long aether_util_scalarstring_to_ull(const char* first, const char* end);
+
+/**
+ * Swaps values
+ */
+void aether_util_uchar_ptr_swap(unsigned char* first, unsigned char* last);
+
+/**
+ * Reverses the bytes from unsigned char* [first, last]
+ */
+void aether_util_uchar_arr_reverse(unsigned char* first, unsigned char* last);
+
+/**
+ * Returns the number of bytes required to encode the length of n,
+ * encoded as a big endian integer across an 8-bit byte array.
+ */
+unsigned char aether_util_big_endian_bytes_size(unsigned long long n);
+
 #ifdef __cplusplus
 }
 #endif

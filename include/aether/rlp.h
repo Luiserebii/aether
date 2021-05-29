@@ -52,6 +52,12 @@ void aether_rlp_t_init_byte_array_range(struct aether_rlp_t* t, const unsigned c
 void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* first, const char* last);
 
 /**
+ * Initialize a aether_rlp_t as a byte_array (B) with a scalar string
+ * of [first, last) range.
+ */
+void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const char* first, const char* last);
+
+/**
  * Initialize a aether_rlp_t from a c-string.
  * See aether_rlp_t_init_from_string.
  */
@@ -78,6 +84,14 @@ void aether_rlp_t_init_from_string(struct aether_rlp_t* t, const char* rlp_str);
 void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp_str_b, const char* rlp_str_e);
 
 /**
+ * Returns the total serialized byte size of the RLP_T.
+ *
+ * Note that if the byte size is over 2^64-1, i.e. the RLP is
+ * invalid in this way, the behavior is undefined.
+ */
+unsigned long long aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp);
+
+/**
  * If the value to be serialised is a byte array, the RLP serialisation takes one of three forms:
  *    •If the byte array contains solely a single byte and that single byte is less than 128, then the input is exactly equal to the output.
  *    •If the byte array contains fewer than 56 bytes, then the output is equal to the input prefixed by the byte equal to the length of the byte array plus 128.
@@ -94,6 +108,24 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out);
  * Deinitializes a aether_rlp_t, recursively calling it if needed.
  */
 void aether_rlp_t_deinit(struct aether_rlp_t* t);
+
+/*********************************
+ * rlp_t member helper functions
+ *********************************/
+
+/**
+ * Writes n as a big endian integer appended to vector_uchar* out.
+ * 8 bits are written across each element of the vector.
+ */
+void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long n);
+
+/**
+ * Returns the total serialized byte size of the RLP list items.
+ *
+ * Note that if the byte size is over 2^64-1, i.e. the RLP is
+ * invalid in this way, the behavior is undefined.
+ */
+unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list);
 
 #ifdef __cplusplus
 }
