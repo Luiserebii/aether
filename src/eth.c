@@ -4,11 +4,12 @@
 
 #include <assert.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <aether/eth.h>
 #include <aether/util.h>
 
-unsigned char* eth_secp256k1_randseckey(eth_secp256k1_seckey* sk) {
+const unsigned char* aether_secp256k1_randskey(aether_secp256k1_seckey* sk) {
     //Fill our raw buffer with CSPRNG bytes from /dev/urandom
     getrandom(sk->data, 32, 0);
     //Mask off all unneeded bytes
@@ -18,13 +19,13 @@ unsigned char* eth_secp256k1_randseckey(eth_secp256k1_seckey* sk) {
     return sk->data;
 }
 
-void eth_secp256k1_generateseckey(eth_secp256k1_seckey* sk, const secp256k1_context* ctx) {
+void aether_secp256k1_genskey(aether_secp256k1_seckey* sk, const secp256k1_context* ctx) {
     //Generate a new one until valid
-    while(!secp256k1_ec_seckey_verify(ctx, eth_secp256k1_randseckey(sk)))
+    while(!secp256k1_ec_seckey_verify(ctx, aether_secp256k1_randskey(sk)))
         ;
 }
 
-void eth_secp256k1_calculatepubkey(eth_secp256k1_unc_pubkey* pk, const secp256k1_context* ctx, const eth_secp256k1_seckey* sk) {
+void aether_secp256k1_calcpkey(aether_secp256k1_unc_pubkey* pk, const secp256k1_context* ctx, const aether_secp256k1_seckey* sk) {
     //Generate public key
     secp256k1_pubkey secp_pubkey;
     int pkcres = secp256k1_ec_pubkey_create(ctx, &secp_pubkey, sk->data);
@@ -35,66 +36,30 @@ void eth_secp256k1_calculatepubkey(eth_secp256k1_unc_pubkey* pk, const secp256k1
     secp256k1_ec_pubkey_serialize(ctx, pk->data, &outputlen, &secp_pubkey, SECP256K1_EC_UNCOMPRESSED);
 }
 
-void eth_keccak_calculatepkhash(eth_keccak256_hash* kh, const unsigned char* data) {
+void aether_keccak256_bhash(aether_keccak256_hash* kh, const unsigned char* data) {
     union ethash_hash256 ehash = ethash_keccak256(data, 64);
     memcpy(kh->data, ehash.str, 32);
 }
 
-void eth_pubkey_khash_calculate(eth_pubkey_khash* kh, const eth_secp256k1_unc_pubkey* pk) {
+void aether_keccak256_pkhash(aether_eth_pubkey_khash* kh, const aether_secp256k1_unc_pubkey* pk) {
     //Grab the pointer up from the public key, as we ignore the first uncompressed byte
     const unsigned char* pk_data = pk->data + 1;
-    eth_keccak_calculatepkhash(kh, pk_data);
+    aether_keccak256_bhash(kh, pk_data);
 }
 
-const unsigned char* eth_pubkey_khash_getaddress(const eth_pubkey_khash* kh) {
+const unsigned char* aether_eth_pubkey_khash_getaddress(const aether_eth_pubkey_khash* kh) {
     return kh->data+12;
 }
 
-static int aether_util_hexchartoi(char c) {
-    static int hextable[] = {[(unsigned char) '0']=0, [(unsigned char) '1']=1, 
-                             [(unsigned char) '2']=2, [(unsigned char) '3']=3, 
-                             [(unsigned char) '4']=4, [(unsigned char) '5']=5,
-                             [(unsigned char) '6']=6, [(unsigned char) '7']=7, 
-                             [(unsigned char) '8']=8, [(unsigned char) '9']=9, 
-                             [(unsigned char) 'A']=10, [(unsigned char) 'B']=11,
-                             [(unsigned char) 'C']=12, [(unsigned char) 'D']=13, 
-                             [(unsigned char) 'E']=14, [(unsigned char) 'F']=15};
-    return hextable[(unsigned char) c];
-}
-
-static unsigned char aether_util_hexchartouchar(char c) {
-    static unsigned char hextable[] = {[(unsigned char) '0']=0, [(unsigned char) '1']=1, 
-                             [(unsigned char) '2']=2, [(unsigned char) '3']=3, 
-                             [(unsigned char) '4']=4, [(unsigned char) '5']=5,
-                             [(unsigned char) '6']=6, [(unsigned char) '7']=7, 
-                             [(unsigned char) '8']=8, [(unsigned char) '9']=9, 
-                             [(unsigned char) 'A']=10, [(unsigned char) 'B']=11,
-                             [(unsigned char) 'C']=12, [(unsigned char) 'D']=13, 
-                             [(unsigned char) 'E']=14, [(unsigned char) 'F']=15};
-    return hextable[(unsigned char) c];
-}
-
-void aether_util_hexstringtobytes(unsigned char* bytes, const char* b, const char* e) {
-    size_t i = 0;
-    for(; e - b >= 2; b+=2, ++i) {
-        bytes[i] |= (aether_util_hexchartouchar(*b)) << 4;
-        bytes[i] |= aether_util_hexchartouchar(*(b + 1));
-    }
-    if(b != e) {
-        //We have an odd number of bytes, write the last one
-        bytes[i] |= (aether_util_hexchartouchar(*b)) << 4;
-    }
-}
-
-void eth_pubkey_khash_writeeip55address(FILE* stream, const eth_pubkey_khash* kh) {
+void aether_eth_pubkey_khash_writeeip55address(FILE* stream, const aether_eth_pubkey_khash* kh) {
     char loweraddr[41];
-    eth_util_bytestohexstring(loweraddr, eth_pubkey_khash_getaddress(kh), 20);
+    aether_util_bytestohexstring(loweraddr, aether_eth_pubkey_khash_getaddress(kh), 20);
     aether_util_tolowerstr(loweraddr);    
 
     //Hash the lowercase address
     union ethash_hash256 ehash = ethash_keccak256((unsigned char*) loweraddr, 40);
     char ehash_digits[41];
-    eth_util_bytestohexstring(ehash_digits, (unsigned char*) ehash.str, 20);
+    aether_util_bytestohexstring(ehash_digits, (unsigned char*) ehash.str, 20);
 
     //Finally, using the hash, write each char according to EIP-55, checking if
     //the character hex value of the hash is greater than 8
@@ -107,8 +72,8 @@ void eth_pubkey_khash_writeeip55address(FILE* stream, const eth_pubkey_khash* kh
     }
 }
 
-void eth_pubkey_khash_eip55addresstostring(char* out, const eth_pubkey_khash* kh) {
-    eth_util_bytestohexstring(out, eth_pubkey_khash_getaddress(kh), 20);
+void aether_eth_pubkey_khash_eip55addresstostring(char* out, const aether_eth_pubkey_khash* kh) {
+    aether_util_bytestohexstring(out, aether_eth_pubkey_khash_getaddress(kh), 20);
     aether_util_tolowerstr(out);
 
     //Hash the lowercase address
@@ -123,23 +88,4 @@ void eth_pubkey_khash_eip55addresstostring(char* out, const eth_pubkey_khash* kh
     }
 }
 
-char* eth_util_bytestohexstring(char* out, const unsigned char* bytes, size_t bytes_sz) {
-    static char hextable[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
-                              'B', 'C', 'D', 'E', 'F'};
-    for(size_t i = 0; i < bytes_sz; ++i) {
-        *out++ = hextable[(bytes[i] >> 4) & 0xF];
-        *out++ = hextable[bytes[i] & 0xF];
-    }
-    *out++ = '\0';
-    return out;
-}
-
-void eth_util_writebytestohex(FILE* stream, const unsigned char* bytes, size_t bytes_sz) {
-    static char hextable[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
-                              'B', 'C', 'D', 'E', 'F'};
-    for(size_t i = 0; i < bytes_sz; ++i) {
-        putc(hextable[(bytes[i] >> 4) & 0xF], stream);
-        putc(hextable[bytes[i] & 0xF], stream);
-    }
-}
 
