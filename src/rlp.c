@@ -99,7 +99,7 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
     }
 }
 
-unsigned long long aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp) {
+size_t aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp) {
     switch(rlp->tag) {
         case AETHER_RLP_T_BYTE_ARR: {
             const vector_uchar* byte_array = &rlp->value.byte_array;
@@ -167,7 +167,7 @@ void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out) {
         }
         case AETHER_RLP_T_LIST: {
             const vector_rlp_t* list = &t->value.list;
-            const unsigned long long sz = vector_rlp_t_list_items_serialized_total_sz(list);
+            const size_t sz = vector_rlp_t_list_items_serialized_total_sz(list);
             if(sz < 56) {
                 vector_uchar_push_back(rlp_out, 192U + sz);
                 const struct aether_rlp_t* end = vector_rlp_t_end(list);
@@ -219,7 +219,7 @@ void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long 
     aether_util_uchar_arr_reverse(vector_uchar_begin(out) + sz, vector_uchar_end(out));
 }
 
-unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list) {
+size_t vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list) {
     size_t sz = 0;
     //Count serializations
     const struct aether_rlp_t* end = vector_rlp_t_end(list);

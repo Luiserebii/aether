@@ -89,7 +89,7 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
  * Note that if the byte size is over 2^64-1, i.e. the RLP is
  * invalid in this way, the behavior is undefined.
  */
-unsigned long long aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp);
+size_t aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp);
 
 /**
  * If the value to be serialised is a byte array, the RLP serialisation takes one of three forms:
@@ -125,7 +125,7 @@ void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long 
  * Note that if the byte size is over 2^64-1, i.e. the RLP is
  * invalid in this way, the behavior is undefined.
  */
-unsigned long long vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list);
+size_t vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list);
 
 #ifdef __cplusplus
 }
