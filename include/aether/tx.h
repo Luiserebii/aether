@@ -15,7 +15,6 @@ struct aether_eth_tx_sig {
 };
 
 /**
- * TODO: These scalar fields should be either mpz_t or unsigned char[32] (256-bit)
  */
 struct aether_eth_tx {
     unsigned char nonce[32];
@@ -33,9 +32,20 @@ struct aether_eth_tx {
 void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, vector_uchar* tx_sig, const secp256k1_context* ctx);
 
 /**
- * Should const unsigned char* data be 32-byte?
+ * Calculate the numerical value {0, 1} using the parity of the y-coordinate.
+ * pk_y is assumed to be of 32 bytes in size.
  */
-void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const secp256k1_context* ctx);
+int aether_secp256k1_pk_y_parity(const unsigned char* pk_y);
+
+/**
+ * Calculate v, as chainid * 2 + 35 + parity of pk_y (i.e. {0, 1}).
+ * v, pk_y, and chainid are all assumed to be of 32 bytes in size.
+ */
+void aether_secp256k1_ecdsa_calc_v(unsigned char* v, const unsigned char* pk_y, const unsigned char* chainid);
+
+/**
+ */
+void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const unsigned char* chainid, const secp256k1_context* ctx);
 
 #ifdef __cplusplus
 }

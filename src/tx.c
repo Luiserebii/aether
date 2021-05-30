@@ -21,7 +21,7 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
 
     //Sign our hash using our private key, obtaining our v, r, s values
     struct aether_eth_tx_sig sig;
-    aether_secp256k1_ecdsa_sign(&sig, sk, tx_hash.data, ctx);
+    aether_secp256k1_ecdsa_sign(&sig, sk, tx_hash.data, tx->sig.v, ctx);
 
     //Finally, add v, r, s and re-encode
     vector_uchar_clear(tx_sig);
@@ -34,11 +34,9 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
 }
 
 int aether_secp256k1_pk_y_parity(const unsigned char* pk_y) {
-    return aether_util_hexchartouchar(pk_y[32]) % 2 == 0 ? 0 : 1;
+    return aether_util_hexchartouchar(pk_y[31]) % 2 == 0 ? 0 : 1;
 }
-/**
- * Calculate v, as chainid * 2 + 35 + parity of pk_y (i.e. {0, 1})
- */
+
 void aether_secp256k1_ecdsa_calc_v(unsigned char* v, const unsigned char* pk_y, const unsigned char* chainid) {
     mpz_t v_num;
     mpz_init(v_num);
@@ -49,7 +47,7 @@ void aether_secp256k1_ecdsa_calc_v(unsigned char* v, const unsigned char* pk_y, 
     mpz_clear(v_num);
 }
 
-void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const secp256k1_context* ctx) {
+void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const unsigned char* chainid, const secp256k1_context* ctx) {
     //Generation of ephemeral private and public keys
     aether_secp256k1_seckey eph_sk;
     aether_secp256k1_genskey(&eph_sk, ctx);
@@ -66,8 +64,12 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     aether_util_mpz_import(z, 32, data);
     mpz_set_str(p, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
 
-    //Set r, (and v and s?)
+    //Perform modular arithmetic to calculate s
+
+    //Set v, r, (and s?)
+    aether_secp256k1_ecdsa_calc_v(sig->v, eph_pk.data + 32 + 1, chainid);
     memcpy(sig->r, eph_pk.data + 1, 32);
+    aether_util_mpz_export(sig->s, 32, s);
 
     //Release mpz_t values
     mpz_clears(q, r, k, z, p, s, NULL);
