@@ -8,6 +8,7 @@ extern "C" {
 #include "./vector-rlp-t.h"
 #include "./vector-uchar.h"
 #include "./eth.h"
+#include "./tx.h"
 
 enum aether_rlp_t_tag { AETHER_RLP_T_LIST, AETHER_RLP_T_BYTE_ARR };
 
@@ -58,6 +59,12 @@ void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* 
 void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const char* first, const char* last);
 
 /**
+ * Initialize a aether_rlp_t as a byte_array (B) with a scalar unsigned
+ * long long.
+ */
+void aether_rlp_t_init_byte_array_scalarull(struct aether_rlp_t* t, unsigned long long n);
+
+/**
  * Initialize a aether_rlp_t from a c-string.
  * See aether_rlp_t_init_from_string.
  */
@@ -82,6 +89,11 @@ void aether_rlp_t_init_from_string(struct aether_rlp_t* t, const char* rlp_str);
  *    * [0xA194,[],[[],0x293821B,0x843CA] 
  */
 void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp_str_b, const char* rlp_str_e);
+
+/**
+ * 
+ */
+void aether_rlp_t_init_tx(struct aether_rlp_t* t, const struct aether_eth_tx* tx);
 
 /**
  * Returns the total serialized byte size of the RLP_T.

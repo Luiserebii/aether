@@ -38,6 +38,18 @@ typedef struct {
 typedef aether_keccak256_hash aether_eth_pubkey_khash;
 
 /**
+ * Ethereum address data type.
+ */
+typedef struct {
+    unsigned char data[20];
+} aether_eth_address;
+
+/**
+ * Returns non-zero if the address is empty.
+ */
+int aether_eth_address_iszero(aether_eth_address* addr);
+
+/**
  * Generates a random secp256k1 secret key. Each byte is guaranteed to be in
  * the range of [0, 2^8-1]. Therefore, the value of the secret key is
  * guaranteed to be in the range of [0, 2^32-1].

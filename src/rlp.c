@@ -1,5 +1,6 @@
 #include <aether/rlp-parse.h>
 #include <aether/rlp.h>
+#include <aether/tx.h>
 #include <aether/vector-rlp-t.h>
 #include <aether/vector-uchar.h>
 #include <aether/util.h>
@@ -9,6 +10,7 @@
 #include <math.h>
 #include <assert.h>
 #include <ctype.h>
+#include "aether/eth.h"
 
 void aether_rlp_t_init_list(struct aether_rlp_t* t) {
     vector_rlp_t_init(&t->value.list);
@@ -41,7 +43,10 @@ void aether_rlp_t_init_byte_array_hexstring(struct aether_rlp_t* t, const char* 
 }
 
 void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const char* first, const char* last) {
-    unsigned long long n = aether_util_scalarstring_to_ull(first, last);
+    aether_rlp_t_init_byte_array_scalarull(t, aether_util_scalarstring_to_ull(first, last));
+}
+
+void aether_rlp_t_init_byte_array_scalarull(struct aether_rlp_t* t, unsigned long long n) {
     if(!n) {
         vector_uchar_init_size(&t->value.byte_array, 1);
         *(vector_uchar_begin(&t->value.byte_array)) = 128U;
@@ -52,6 +57,13 @@ void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const cha
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
 
+void aether_rlp_t_init_byte_array_address(struct aether_rlp_t* t, aether_eth_address* addr) {
+    if(aether_eth_address_iszero(addr)) {
+        aether_rlp_t_init_byte_array_empty(t);
+    } else {
+        aether_rlp_t_init_byte_array_range(t, addr->data, addr->data + 20);
+    }
+}
 void aether_rlp_t_init_from_string(struct aether_rlp_t* t, const char* rlp_str) {
     const char* rlp_str_begin = rlp_str;
     for(; *rlp_str; ++rlp_str)
@@ -97,6 +109,27 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
             assert(0);
             break;
     }
+}
+
+void aether_rlp_t_init_tx(struct aether_rlp_t* t, const struct aether_eth_tx* tx) {
+    vector_rlp_t_init_size(&t->value.list, 9);
+    struct aether_rlp_t* e = vector_rlp_t_begin(&t->value.list);
+    //Add nonce, gasprice, gaslimit
+    aether_rlp_t_init_byte_array_scalarull(e++, tx->nonce);
+    aether_rlp_t_init_byte_array_scalarull(e++, tx->gasprice);
+    aether_rlp_t_init_byte_array_scalarull(e++, tx->gaslimit);
+    //Add to address
+    aether_rlp_t_init_byte_array_address(e++, &tx->to);
+    //Add value
+    aether_rlp_t_init_byte_array_scalarull(e++, tx->value);
+    //Add data 
+    aether_rlp_t_init_byte_array_range(e++, tx->data.bytes, tx->data.bytes + tx->data.sz);
+    //Add v, r, s
+    aether_rlp_t_init_byte_array_scalarull(e++, tx->sig.v);
+    aether_rlp_t_init_byte_array_scalarull(e++, tx->sig.r);
+    aether_rlp_t_init_byte_array_scalarull(e, tx->sig.s);
+
+    t->tag = AETHER_RLP_T_LIST;
 }
 
 size_t aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp) {

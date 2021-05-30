@@ -88,4 +88,11 @@ void aether_eth_pubkey_khash_eip55addresstostring(char* out, const aether_eth_pu
     }
 }
 
-
+int aether_eth_address_iszero(aether_eth_address* addr) {
+    for(size_t i = 0; i < 20; ++i) {
+        if(addr->data[i] != 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
