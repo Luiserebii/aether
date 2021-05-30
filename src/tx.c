@@ -2,11 +2,10 @@
 #include <aether/vector-uchar.h>
 #include <aether/eth.h>
 #include <aether/rlp.h>
+#include <aether/util.h>
 
 #include <gmp.h>
 #include <secp256k1.h>
-
-
 
 void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, vector_uchar* tx_sig, const secp256k1_context* ctx) {
     //Encode transaction as RLP-serialized
@@ -28,10 +27,27 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
     aether_rlp_t_set_byte_array_scalarull(e++, sig.v);
     aether_rlp_t_set_byte_array_scalarull(e++, sig.r);
     aether_rlp_t_set_byte_array_scalarull(e, sig.s);
+
+    aether_rlp_t_encode(&tx_rlp, tx_sig);
 }
 
 void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const secp256k1_context* ctx) {
-    
-    
+    //Generation of ephemeral private and public keys
+    aether_secp256k1_seckey eph_sk;
+    aether_secp256k1_genskey(&eph_sk, ctx);
 
+    aether_secp256k1_unc_pubkey eph_pk;
+    aether_secp256k1_calcpkey(&eph_pk, ctx, &eph_sk);
+    
+    //Set up values for modular arithmetic
+    mpz_t q, r, k, z, p, s;
+    mpz_inits(q, r, k, z, p, s, NULL);
+    aether_util_mpz_import(q, 32, eph_sk.data);
+    aether_util_mpz_import(r, 32, eph_pk.data + 1);
+    aether_util_mpz_import(k, 32, sk->data);
+    aether_util_mpz_import(z, 32, data);
+    mpz_set_str(p, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+
+    //Release mpz_t values
+    mpz_clears(q, r, k, z, p, s, NULL);
 }

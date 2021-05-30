@@ -3,6 +3,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include <gmp.h>
+
 void aether_util_tolowerstr(char* str) {
     while((*str = tolower(*str)) && ++str)
         ;
@@ -93,4 +95,8 @@ unsigned char aether_util_big_endian_bytes_size(unsigned long long n) {
     }
     return cnt;
 }
+
+void aether_util_mpz_import(mpz_t rop, size_t sz, const void* bytes) {
+    mpz_import(rop, sz, 1, 1, 1, 0, bytes);
+} 
 

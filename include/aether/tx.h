@@ -14,6 +14,9 @@ struct aether_eth_tx_sig {
     unsigned long long s;
 };
 
+/**
+ * TODO: These scalar fields should be either mpz_t or unsigned char[32] (256-bit)
+ */
 struct aether_eth_tx {
     unsigned long long nonce;
     unsigned long long gasprice;

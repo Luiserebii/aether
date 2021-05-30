@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
+#include <gmp.h>
 
 /**
  * Changes all characters in str to lowercase.
@@ -76,6 +77,11 @@ void aether_util_uchar_arr_reverse(unsigned char* first, unsigned char* last);
  * encoded as a big endian integer across an 8-bit byte array.
  */
 unsigned char aether_util_big_endian_bytes_size(unsigned long long n);
+
+/**
+ * Imports sz bytes, big endian, into the mpz_t rop passed.
+ */
+void aether_util_mpz_import(mpz_t rop, size_t sz, const void* bytes);
 
 #ifdef __cplusplus
 }
