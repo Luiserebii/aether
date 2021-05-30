@@ -130,19 +130,19 @@ void aether_rlp_t_init_tx(struct aether_rlp_t* t, const struct aether_eth_tx* tx
     vector_rlp_t_init_size(&t->value.list, 9);
     struct aether_rlp_t* e = vector_rlp_t_begin(&t->value.list);
     //Add nonce, gasprice, gaslimit
-    aether_rlp_t_init_byte_array_scalarull(e++, tx->nonce);
-    aether_rlp_t_init_byte_array_scalarull(e++, tx->gasprice);
-    aether_rlp_t_init_byte_array_scalarull(e++, tx->gaslimit);
+    aether_rlp_t_init_byte_array_scalarbytes(e++, tx->nonce, tx->nonce + 32);
+    aether_rlp_t_init_byte_array_scalarbytes(e++, tx->gasprice, tx->gasprice + 32);
+    aether_rlp_t_init_byte_array_scalarbytes(e++, tx->gaslimit, tx->gaslimit + 32);
     //Add to address
     aether_rlp_t_init_byte_array_address(e++, &tx->to);
     //Add value
-    aether_rlp_t_init_byte_array_scalarull(e++, tx->value);
+    aether_rlp_t_init_byte_array_scalarbytes(e++, tx->value, tx->value + 32);
     //Add data 
     aether_rlp_t_init_byte_array_range(e++, tx->data.bytes, tx->data.bytes + tx->data.sz);
     //Add v, r, s
-    aether_rlp_t_init_byte_array_scalarull(e++, tx->sig.v);
-    aether_rlp_t_init_byte_array_scalarull(e++, tx->sig.r);
-    aether_rlp_t_init_byte_array_scalarull(e, tx->sig.s);
+    aether_rlp_t_init_byte_array_scalarbytes(e++, tx->sig.v, tx->sig.v + 32);
+    aether_rlp_t_init_byte_array_scalarbytes(e++, tx->sig.r, tx->sig.r + 32);
+    aether_rlp_t_init_byte_array_scalarbytes(e, tx->sig.s, tx->sig.s + 32);
 
     t->tag = AETHER_RLP_T_LIST;
 }

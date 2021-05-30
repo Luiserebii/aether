@@ -24,9 +24,9 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
     //Finally, add v, r, s and re-encode
     vector_uchar_clear(tx_sig);
     struct aether_rlp_t* e = vector_rlp_t_begin(&tx_rlp.value.list) + 6;
-    aether_rlp_t_set_byte_array_scalarull(e++, sig.v);
-    aether_rlp_t_set_byte_array_scalarull(e++, sig.r);
-    aether_rlp_t_set_byte_array_scalarull(e, sig.s);
+    aether_rlp_t_set_byte_array_scalarbytes(e++, sig.v, sig.v + 32);
+    aether_rlp_t_set_byte_array_scalarbytes(e++, sig.r, sig.r + 32);
+    aether_rlp_t_set_byte_array_scalarbytes(e, sig.s, sig.s + 32);
 
     aether_rlp_t_encode(&tx_rlp, tx_sig);
 }

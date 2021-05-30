@@ -9,25 +9,24 @@ extern "C" {
 #include <aether/vector-uchar.h>
 
 struct aether_eth_tx_sig {
-    unsigned long long v;
-    unsigned long long r;
-    unsigned long long s;
+    unsigned char v[32];
+    unsigned char r[32];
+    unsigned char s[32];
 };
 
 /**
  * TODO: These scalar fields should be either mpz_t or unsigned char[32] (256-bit)
  */
 struct aether_eth_tx {
-    unsigned long long nonce;
-    unsigned long long gasprice;
-    unsigned long long gaslimit;
+    unsigned char nonce[32];
+    unsigned char gasprice[32];
+    unsigned char gaslimit[32];
     aether_eth_address to;
-    unsigned long long value;
+    unsigned char value[32];
     struct { //alternatively, init
         unsigned char* bytes;
         size_t sz;
     } data;
-    unsigned long long v;
     struct aether_eth_tx_sig sig;
 };
 
