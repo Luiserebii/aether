@@ -4,6 +4,8 @@
 #include <aether/rlp.h>
 #include <aether/util.h>
 
+#include <string.h>
+
 #include <gmp.h>
 #include <secp256k1.h>
 
@@ -31,6 +33,22 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
     aether_rlp_t_encode(&tx_rlp, tx_sig);
 }
 
+int aether_secp256k1_pk_y_parity(const unsigned char* pk_y) {
+    return aether_util_hexchartouchar(pk_y[32]) % 2 == 0 ? 0 : 1;
+}
+/**
+ * Calculate v, as chainid * 2 + 35 + parity of pk_y (i.e. {0, 1})
+ */
+void aether_secp256k1_ecdsa_calc_v(unsigned char* v, const unsigned char* pk_y, const unsigned char* chainid) {
+    mpz_t v_num;
+    mpz_init(v_num);
+    aether_util_mpz_import(v_num, 32, chainid);
+    mpz_mul_ui(v_num, v_num, 2);
+    mpz_add_ui(v_num, v_num, 35 + aether_secp256k1_pk_y_parity(pk_y));
+    aether_util_mpz_export(v, 32, v_num);
+    mpz_clear(v_num);
+}
+
 void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const secp256k1_context* ctx) {
     //Generation of ephemeral private and public keys
     aether_secp256k1_seckey eph_sk;
@@ -47,6 +65,9 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     aether_util_mpz_import(k, 32, sk->data);
     aether_util_mpz_import(z, 32, data);
     mpz_set_str(p, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+
+    //Set r, (and v and s?)
+    memcpy(sig->r, eph_pk.data + 1, 32);
 
     //Release mpz_t values
     mpz_clears(q, r, k, z, p, s, NULL);
