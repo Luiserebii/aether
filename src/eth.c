@@ -36,15 +36,15 @@ void aether_secp256k1_calcpkey(aether_secp256k1_unc_pubkey* pk, const secp256k1_
     secp256k1_ec_pubkey_serialize(ctx, pk->data, &outputlen, &secp_pubkey, SECP256K1_EC_UNCOMPRESSED);
 }
 
-void aether_keccak256_bhash(aether_keccak256_hash* kh, const unsigned char* data) {
-    union ethash_hash256 ehash = ethash_keccak256(data, 64);
+void aether_keccak256_bhash(aether_keccak256_hash* kh, const unsigned char* data, size_t sz) {
+    union ethash_hash256 ehash = ethash_keccak256(data, sz);
     memcpy(kh->data, ehash.str, 32);
 }
 
 void aether_keccak256_pkhash(aether_eth_pubkey_khash* kh, const aether_secp256k1_unc_pubkey* pk) {
     //Grab the pointer up from the public key, as we ignore the first uncompressed byte
     const unsigned char* pk_data = pk->data + 1;
-    aether_keccak256_bhash(kh, pk_data);
+    aether_keccak256_bhash(kh, pk_data, 64);
 }
 
 const unsigned char* aether_eth_pubkey_khash_getaddress(const aether_eth_pubkey_khash* kh) {
@@ -88,7 +88,7 @@ void aether_eth_pubkey_khash_eip55addresstostring(char* out, const aether_eth_pu
     }
 }
 
-int aether_eth_address_iszero(aether_eth_address* addr) {
+int aether_eth_address_iszero(const aether_eth_address* addr) {
     for(size_t i = 0; i < 20; ++i) {
         if(addr->data[i] != 0) {
             return 0;

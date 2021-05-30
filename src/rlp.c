@@ -57,7 +57,7 @@ void aether_rlp_t_init_byte_array_scalarull(struct aether_rlp_t* t, unsigned lon
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
 
-void aether_rlp_t_init_byte_array_address(struct aether_rlp_t* t, aether_eth_address* addr) {
+void aether_rlp_t_init_byte_array_address(struct aether_rlp_t* t, const aether_eth_address* addr) {
     if(aether_eth_address_iszero(addr)) {
         aether_rlp_t_init_byte_array_empty(t);
     } else {
@@ -130,6 +130,15 @@ void aether_rlp_t_init_tx(struct aether_rlp_t* t, const struct aether_eth_tx* tx
     aether_rlp_t_init_byte_array_scalarull(e, tx->sig.s);
 
     t->tag = AETHER_RLP_T_LIST;
+}
+
+void aether_rlp_t_set_byte_array_scalarull(struct aether_rlp_t* t, unsigned long long n) {
+    vector_uchar_clear(&t->value.byte_array);
+    if(!n) {
+        vector_uchar_push_back(&t->value.byte_array, 128U);
+    } else {
+        vector_uchar_insert_big_endian_bytes(&t->value.byte_array, n);
+    }
 }
 
 size_t aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp) {

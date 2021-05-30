@@ -45,11 +45,6 @@ typedef struct {
 } aether_eth_address;
 
 /**
- * Returns non-zero if the address is empty.
- */
-int aether_eth_address_iszero(aether_eth_address* addr);
-
-/**
  * Generates a random secp256k1 secret key. Each byte is guaranteed to be in
  * the range of [0, 2^8-1]. Therefore, the value of the secret key is
  * guaranteed to be in the range of [0, 2^32-1].
@@ -72,9 +67,9 @@ void aether_secp256k1_genskey(aether_secp256k1_seckey* sk, const secp256k1_conte
 void aether_secp256k1_calcpkey(aether_secp256k1_unc_pubkey* pk, const secp256k1_context* ctx, const aether_secp256k1_seckey* sk);
 
 /**
- * Calculates the keccak256 hash from any arbitrary data.
+ * Calculates the keccak256 hash from any arbitrary data, reading sz bytes.
  */
-void aether_keccak256_bhash(aether_keccak256_hash* kh, const unsigned char* data);
+void aether_keccak256_bhash(aether_keccak256_hash* kh, const unsigned char* data, size_t sz);
 
 /**
  * Calculates the keccak256 hash from a public key. 
@@ -98,6 +93,11 @@ void aether_eth_pubkey_khash_writeeip55address(FILE* stream, const aether_eth_pu
  * ensure that the out buffer can store them.
  */
 void aether_eth_pubkey_khash_eip55addresstostring(char* out, const aether_eth_pubkey_khash* kh);
+
+/**
+ * Returns non-zero if the address is empty.
+ */
+int aether_eth_address_iszero(const aether_eth_address* addr);
 
 #ifdef __cplusplus
 }

@@ -65,6 +65,12 @@ void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const cha
 void aether_rlp_t_init_byte_array_scalarull(struct aether_rlp_t* t, unsigned long long n);
 
 /**
+ *
+ *
+ */
+void aether_rlp_t_init_byte_array_address(struct aether_rlp_t* t, const aether_eth_address* addr);
+
+/**
  * Initialize a aether_rlp_t from a c-string.
  * See aether_rlp_t_init_from_string.
  */
@@ -94,6 +100,11 @@ void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp
  * 
  */
 void aether_rlp_t_init_tx(struct aether_rlp_t* t, const struct aether_eth_tx* tx);
+
+/**
+ * Sets the initialized aether_rlp_t byte array to the unsigned long long n.
+ */
+void aether_rlp_t_set_byte_array_scalarull(struct aether_rlp_t* t, unsigned long long n);
 
 /**
  * Returns the total serialized byte size of the RLP_T.

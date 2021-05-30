@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <aether/eth.h>
+#include <aether/vector-uchar.h>
 
 struct aether_eth_tx_sig {
     unsigned long long v;
@@ -26,6 +27,13 @@ struct aether_eth_tx {
     unsigned long long v;
     struct aether_eth_tx_sig sig;
 };
+
+void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, vector_uchar* tx_sig, const secp256k1_context* ctx);
+
+/**
+ * Should const unsigned char* data be 32-byte?
+ */
+void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const secp256k1_context* ctx);
 
 #ifdef __cplusplus
 }
