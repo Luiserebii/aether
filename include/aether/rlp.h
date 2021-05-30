@@ -65,6 +65,12 @@ void aether_rlp_t_init_byte_array_scalarstring(struct aether_rlp_t* t, const cha
 void aether_rlp_t_init_byte_array_scalarull(struct aether_rlp_t* t, unsigned long long n);
 
 /**
+ * Initialize a aether_rlp_t as a byte_array (B) with a scalar byte array.
+ * This scalar byte array may have leading zeros.
+ */
+void aether_rlp_t_init_byte_array_scalarbytes(struct aether_rlp_t* t, const unsigned char* first, const unsigned char* last);
+
+/**
  *
  *
  */
@@ -105,6 +111,12 @@ void aether_rlp_t_init_tx(struct aether_rlp_t* t, const struct aether_eth_tx* tx
  * Sets the initialized aether_rlp_t byte array to the unsigned long long n.
  */
 void aether_rlp_t_set_byte_array_scalarull(struct aether_rlp_t* t, unsigned long long n);
+
+/**
+ * Sets the initialized aether_rlp_t byte array to the scalar byte array passed.
+ * This scalar byte array may have leading zeros.
+ */
+void aether_rlp_t_set_byte_array_scalarbytes(struct aether_rlp_t* t, const unsigned char* first, const unsigned char* last);
 
 /**
  * Returns the total serialized byte size of the RLP_T.

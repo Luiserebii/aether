@@ -79,9 +79,21 @@ void aether_util_uchar_arr_reverse(unsigned char* first, unsigned char* last);
 unsigned char aether_util_big_endian_bytes_size(unsigned long long n);
 
 /**
- * Imports sz bytes, big endian, into the mpz_t rop passed.
+ * Returns non-zero if all elements are 0.
+ */
+int aether_util_uchar_arr_iszero(const unsigned char* first, const unsigned char* last);
+
+/**
+ * Imports sz bytes, big-endian, into the mpz_t rop passed.
  */
 void aether_util_mpz_import(mpz_t rop, size_t sz, const void* bytes);
+
+/**
+ * Exports rop as a big-endian value across rop of sz bytes.
+ * Any spare bytes are padded as 0s.
+ * Ex: mpz_t 1A3F0E, size_t 5 ---> 0x00001A3F0E
+ */
+void aether_util_mpz_export(void* rop, size_t sz, const mpz_t op);
 
 #ifdef __cplusplus
 }

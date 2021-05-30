@@ -57,6 +57,21 @@ void aether_rlp_t_init_byte_array_scalarull(struct aether_rlp_t* t, unsigned lon
     t->tag = AETHER_RLP_T_BYTE_ARR;
 }
 
+void aether_rlp_t_init_byte_array_scalarbytes(struct aether_rlp_t* t, const unsigned char* first, const unsigned char* last) {
+    if(aether_util_uchar_arr_iszero(first, last)) {
+        vector_uchar_init_size(&t->value.byte_array, 1);
+        *(vector_uchar_begin(&t->value.byte_array)) = 128U;
+    } else {
+        //Locate first non-zero byte
+        const unsigned char* b = first;
+        for(; *b == 0U; ++b)
+            ;
+        vector_uchar_init_size(&t->value.byte_array, last - b);
+        vector_uchar_insert_range(&t->value.byte_array, vector_uchar_begin(&t->value.byte_array), b, last);
+    }
+    t->tag = AETHER_RLP_T_BYTE_ARR;
+}
+
 void aether_rlp_t_init_byte_array_address(struct aether_rlp_t* t, const aether_eth_address* addr) {
     if(aether_eth_address_iszero(addr)) {
         aether_rlp_t_init_byte_array_empty(t);
@@ -138,6 +153,18 @@ void aether_rlp_t_set_byte_array_scalarull(struct aether_rlp_t* t, unsigned long
         vector_uchar_push_back(&t->value.byte_array, 128U);
     } else {
         vector_uchar_insert_big_endian_bytes(&t->value.byte_array, n);
+    }
+}
+void aether_rlp_t_set_byte_array_scalarbytes(struct aether_rlp_t* t, const unsigned char* first, const unsigned char* last) {
+    vector_uchar_clear(&t->value.byte_array);
+    if(aether_util_uchar_arr_iszero(first, last)) {
+        vector_uchar_push_back(&t->value.byte_array, 128U);
+    } else {
+        //Locate first non-zero byte
+        const unsigned char* b = first;
+        for(; *b == 0U; ++b)
+            ;
+        vector_uchar_insert_range(&t->value.byte_array, vector_uchar_begin(&t->value.byte_array), b, last);
     }
 }
 
