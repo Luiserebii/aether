@@ -63,7 +63,7 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     aether_util_mpz_import(r, 32, eph_pk.data + 1);
     aether_util_mpz_import(k, 32, sk->data);
     aether_util_mpz_import(z, 32, data);
-    mpz_set_str(p, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    mpz_set_str(p, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
 
     //Perform modular arithmetic to calculate s
     mpz_mul(val, r, k);

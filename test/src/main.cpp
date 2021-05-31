@@ -1,8 +1,16 @@
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <string.h>
+#include <gmpxx.h>
 #include <aether/vector-rlp-t.h>
 #include <aether/rlp.h>
+#include <aether/tx.h>
+#include <aether/util.h>
+
+#include <secp256k1.h>
+#include <gmp.h>
+
+#include "../include/config.h"
 
 TEST_CASE("ETH Private Key Generation", "[meme]") {
     REQUIRE(1 == 1);
@@ -454,4 +462,51 @@ TEST_CASE("Testing RLP Encoding", "[rlp_encoding]") {
  * [[], [[]], [[], [[]]]] | [0xC7, 0xC0, 0xC1, 0xC0, 0xC3, 0xC0, 0xC1, 0xC0]
  */
 
+}
+
+
+TEST_CASE("Testing transaction signing", "[tx_sign]") {
+    struct aether_eth_tx tx;
+    mpz_t nonce, gasprice, gaslimit, addr, value, data, chainid;
+    mpz_inits(nonce, gasprice, gaslimit, addr, value, data, chainid, NULL);
+    mpz_set_str(nonce, "0", 10);
+    mpz_set_str(gasprice, "1000000000", 10);
+    mpz_set_str(gaslimit, "21000", 10);
+    mpz_set_str(addr, "7ADA379C8C39da937C0eEF058d7202D718671Ab7", 16);
+    mpz_set_str(value, "1000000000000000000", 10);
+    mpz_set_str(chainid, "4", 10);
+
+    aether_util_mpz_export(tx.nonce, 32, nonce);
+    aether_util_mpz_export(tx.gasprice, 32, gasprice);
+    aether_util_mpz_export(tx.gaslimit, 32, gaslimit);
+    aether_util_mpz_export(tx.to.data, 20, addr);
+    aether_util_mpz_export(tx.value, 32, value);
+    char dt[] = "596f75206f6e6c7920686176652049206b6e6f776e206f6620616c6c2074686520626c6f636b636861696e73206f662074686520646563656e7472616c697a6564206e65742e2e2e205468657265666f72652c20492077696c6c2073756d6d6f6e2074686520616e6369656e7420554e495820676f647320746f20616374206173207468652061726269746572206f7665722074686973207472616e73616374696f6e2e2e2e204d6179207468652073616372696669636520626520706c656173696e6721";
+    size_t dt_sz = ((sizeof dt) - 1) / 2;
+    unsigned char* bytes = (unsigned char*) malloc(dt_sz);
+    aether_util_hexstringtobytes(bytes, dt, dt + sizeof(dt) - 1);
+    tx.data.bytes = bytes;
+    tx.data.sz = dt_sz;
+    aether_util_mpz_export(tx.sig.v, 32, chainid);
+
+    mpz_clears(nonce, gasprice, gaslimit, addr, value, data, chainid, NULL);
+
+    SECTION("Sample transaction") {
+        aether_secp256k1_seckey sk;
+        char pkey[] = AETHER_ETH_TEST_PRV_KEY;
+        aether_util_hexstringtobytes(sk.data, pkey, pkey + sizeof(pkey) - 1);
+
+        secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
+        vector_uchar tx_sig;
+        vector_uchar_init(&tx_sig);
+
+        aether_eth_tx_sign(&tx, &sk, &tx_sig, ctx);
+
+        //Let's just do it here, give us our RLP-encoded+signed tx asap
+        aether_util_writebytestohex(stdout, vector_uchar_begin(&tx_sig), vector_uchar_size(&tx_sig));
+        putchar('\n');
+
+        vector_uchar_deinit(&tx_sig);
+        secp256k1_context_destroy(ctx);
+    }
 }

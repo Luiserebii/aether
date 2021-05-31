@@ -6,3 +6,5 @@ compile_commands.json
 .cache
 test/test
 build
+
+test/include/config.h

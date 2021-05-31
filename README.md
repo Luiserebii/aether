@@ -6,4 +6,5 @@ A general-purpose Ethereum C library.
 
 ```
 sudo apt install libsecp256k1-dev
+sudo apt install libgmp-dev
 ```
