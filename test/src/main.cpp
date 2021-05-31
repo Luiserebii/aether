@@ -13,11 +13,6 @@
 
 #include "../include/config.h"
 
-TEST_CASE("ETH Private Key Generation", "[meme]") {
-    REQUIRE(1 == 1);
-
-}
-
 TEST_CASE("Testing Struct RLP_T", "[rlp_t]") {
     struct aether_rlp_t rlp;
 
