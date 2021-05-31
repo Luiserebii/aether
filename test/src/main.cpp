@@ -7,6 +7,7 @@
 #include <aether/tx.h>
 #include <aether/util.h>
 
+#include <stdlib.h>
 #include <secp256k1.h>
 #include <gmp.h>
 
@@ -461,7 +462,7 @@ TEST_CASE("Testing RLP Encoding", "[rlp_encoding]") {
  * [0x7F, 0x80] | [0xC3, 0x7F, 0x81, 0x80] 
  * [[], [[]], [[], [[]]]] | [0xC7, 0xC0, 0xC1, 0xC0, 0xC3, 0xC0, 0xC1, 0xC0]
  */
-
+;
 }
 
 
@@ -482,12 +483,15 @@ TEST_CASE("Testing transaction signing", "[tx_sign]") {
     aether_util_mpz_export(tx.to.data, 20, addr);
     aether_util_mpz_export(tx.value, 32, value);
     char dt[] = "596f75206f6e6c7920686176652049206b6e6f776e206f6620616c6c2074686520626c6f636b636861696e73206f662074686520646563656e7472616c697a6564206e65742e2e2e205468657265666f72652c20492077696c6c2073756d6d6f6e2074686520616e6369656e7420554e495820676f647320746f20616374206173207468652061726269746572206f7665722074686973207472616e73616374696f6e2e2e2e204d6179207468652073616372696669636520626520706c656173696e6721";
+//    char dt[] = "";
     size_t dt_sz = ((sizeof dt) - 1) / 2;
-    unsigned char* bytes = (unsigned char*) malloc(dt_sz);
+    unsigned char* bytes = (unsigned char*) calloc(dt_sz, 1);
     aether_util_hexstringtobytes(bytes, dt, dt + sizeof(dt) - 1);
     tx.data.bytes = bytes;
     tx.data.sz = dt_sz;
     aether_util_mpz_export(tx.sig.v, 32, chainid);
+    memset(tx.sig.r, 0, 32);
+    memset(tx.sig.s, 0, 32);
 
     mpz_clears(nonce, gasprice, gaslimit, addr, value, data, chainid, NULL);
 

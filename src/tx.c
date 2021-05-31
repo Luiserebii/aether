@@ -70,7 +70,7 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     mpz_add(val, z, val);
     mpz_invert(q, q, p);
     mpz_mul(val, val, q);
-    mpz_mod(z, val, p);
+    mpz_mod(s, val, p);
 
     //Set v, r, (and s?)
     aether_secp256k1_ecdsa_calc_v(sig->v, eph_pk.data + 32 + 1, chainid);
