@@ -31,6 +31,7 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
     aether_rlp_t_set_byte_array_scalarbytes(e, sig.s, sig.s + 32);
 
     aether_rlp_t_encode(&tx_rlp, tx_sig);
+    aether_rlp_t_deinit(&tx_rlp);
 }
 
 int aether_secp256k1_pk_y_parity(const unsigned char* pk_y) {
@@ -56,8 +57,8 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     aether_secp256k1_calcpkey(&eph_pk, ctx, &eph_sk);
     
     //Set up values for modular arithmetic
-    mpz_t q, r, k, z, p, s;
-    mpz_inits(q, r, k, z, p, s, NULL);
+    mpz_t q, r, k, z, p, s, val;
+    mpz_inits(q, r, k, z, p, s, val, NULL);
     aether_util_mpz_import(q, 32, eph_sk.data);
     aether_util_mpz_import(r, 32, eph_pk.data + 1);
     aether_util_mpz_import(k, 32, sk->data);
@@ -65,6 +66,11 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     mpz_set_str(p, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
 
     //Perform modular arithmetic to calculate s
+    mpz_mul(val, r, k);
+    mpz_add(val, z, val);
+    mpz_invert(q, q, p);
+    mpz_mul(val, val, q);
+    mpz_mod(z, val, p);
 
     //Set v, r, (and s?)
     aether_secp256k1_ecdsa_calc_v(sig->v, eph_pk.data + 32 + 1, chainid);
@@ -72,5 +78,5 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     aether_util_mpz_export(sig->s, 32, s);
 
     //Release mpz_t values
-    mpz_clears(q, r, k, z, p, s, NULL);
+    mpz_clears(q, r, k, z, p, s, val, NULL);
 }
