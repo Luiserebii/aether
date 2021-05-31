@@ -113,6 +113,7 @@ void aether_util_mpz_import(mpz_t rop, size_t sz, const void* bytes) {
 void aether_util_mpz_export(void* rop, size_t sz, const mpz_t op) {
     size_t bytes_w;
     mpz_export(rop, &bytes_w, 1, 1, 1, 0, op);
+    assert(bytes_w <= sz);
     if(bytes_w != sz) {
         memmove(rop + sz - bytes_w, rop, bytes_w);
         memset(rop, 0, sz - bytes_w);

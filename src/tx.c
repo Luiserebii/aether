@@ -14,7 +14,7 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
     struct aether_rlp_t tx_rlp;
     aether_rlp_t_init_tx(&tx_rlp, tx);
     aether_rlp_t_encode(&tx_rlp, tx_sig);
-
+    
     //Keccak256 hash of RLP-serialized data
     aether_keccak256_hash tx_hash;
     aether_keccak256_bhash(&tx_hash, vector_uchar_begin(tx_sig), vector_uchar_size(tx_sig));
