@@ -59,14 +59,16 @@ void aether_rlp_t_init_byte_array_scalarull(struct aether_rlp_t* t, unsigned lon
 
 void aether_rlp_t_init_byte_array_scalarbytes(struct aether_rlp_t* t, const unsigned char* first, const unsigned char* last) {
     if(aether_util_uchar_arr_iszero(first, last)) {
-        vector_uchar_init_size(&t->value.byte_array, 1);
-        *(vector_uchar_begin(&t->value.byte_array)) = 128U;
+        //TODO: Modify fully to do nothing!
+        vector_uchar_init(&t->value.byte_array);
+        //vector_uchar_init_size(&t->value.byte_array, 1);
+        //*(vector_uchar_begin(&t->value.byte_array)) = 128U;
     } else {
         //Locate first non-zero byte
         const unsigned char* b = first;
         for(; *b == 0U; ++b)
             ;
-        vector_uchar_init_size(&t->value.byte_array, last - b);
+        vector_uchar_init_capacity(&t->value.byte_array, last - b);
         vector_uchar_insert_range(&t->value.byte_array, vector_uchar_begin(&t->value.byte_array), b, last);
     }
     t->tag = AETHER_RLP_T_BYTE_ARR;
@@ -158,7 +160,8 @@ void aether_rlp_t_set_byte_array_scalarull(struct aether_rlp_t* t, unsigned long
 void aether_rlp_t_set_byte_array_scalarbytes(struct aether_rlp_t* t, const unsigned char* first, const unsigned char* last) {
     vector_uchar_clear(&t->value.byte_array);
     if(aether_util_uchar_arr_iszero(first, last)) {
-        vector_uchar_push_back(&t->value.byte_array, 128U);
+        //TODO: Modify fully to do nothing!
+        //vector_uchar_push_back(&t->value.byte_array, 128U);
     } else {
         //Locate first non-zero byte
         const unsigned char* b = first;
