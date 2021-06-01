@@ -2,10 +2,11 @@
 #include <catch.hpp>
 #include <string.h>
 #include <gmpxx.h>
-#include <aether/vector-rlp-t.h>
+
+#include <aether/vector/vector-rlp-t.h>
 #include <aether/rlp.h>
 #include <aether/tx.h>
-#include <aether/util.h>
+#include <aether-internal/util.h>
 
 #include <stdlib.h>
 #include <secp256k1.h>
