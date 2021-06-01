@@ -14,8 +14,8 @@ enum aether_rlp_t_tag { AETHER_RLP_T_LIST, AETHER_RLP_T_BYTE_ARR };
 
 struct aether_rlp_t {
     union {
-        vector_rlp_t list;
-        vector_uchar byte_array;
+        struct aether_vector_rlp_t list;
+        struct aether_vector_uchar byte_array;
     } value;
     enum aether_rlp_t_tag tag;
 };
@@ -137,7 +137,7 @@ size_t aether_rlp_t_serialized_total_sz(const struct aether_rlp_t* rlp);
  *    •Otherwise, the output is equal to the concatenated serialisations, provided that they contain fewer than 2^64 bytes, prefixed by the minimal-length byte array which when interpreted as a big-endian integer is equal to the length of the concatenated serialisations byte array, which is itself prefixed by the number of bytes required to faithfully encode this length value plus 247.
  *
  */
-void aether_rlp_t_encode(const struct aether_rlp_t* t, vector_uchar* rlp_out);
+void aether_rlp_t_encode(const struct aether_rlp_t* t, struct aether_vector_uchar* rlp_out);
 
 /**
  * Deinitializes a aether_rlp_t, recursively calling it if needed.
@@ -149,10 +149,10 @@ void aether_rlp_t_deinit(struct aether_rlp_t* t);
  *********************************/
 
 /**
- * Writes n as a big endian integer appended to vector_uchar* out.
+ * Writes n as a big endian integer appended to aether_vector_uchar* out.
  * 8 bits are written across each element of the vector.
  */
-void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long n);
+void aether_vector_uchar_insert_big_endian_bytes(struct aether_vector_uchar* out, unsigned long long n);
 
 /**
  * Returns the total serialized byte size of the RLP list items.
@@ -160,7 +160,7 @@ void vector_uchar_insert_big_endian_bytes(vector_uchar* out, unsigned long long 
  * Note that if the byte size is over 2^64-1, i.e. the RLP is
  * invalid in this way, the behavior is undefined.
  */
-size_t vector_rlp_t_list_items_serialized_total_sz(const vector_rlp_t* list);
+size_t aether_vector_rlp_t_list_items_serialized_total_sz(const struct aether_vector_rlp_t* list);
 
 #ifdef __cplusplus
 }

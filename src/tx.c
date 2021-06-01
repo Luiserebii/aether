@@ -10,7 +10,7 @@
 #include <gmp.h>
 #include <secp256k1.h>
 
-void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, vector_uchar* tx_sig, const secp256k1_context* ctx) {
+void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, struct aether_vector_uchar* tx_sig, const secp256k1_context* ctx) {
     //Encode transaction as RLP-serialized
     struct aether_rlp_t tx_rlp;
     aether_rlp_t_init_tx(&tx_rlp, tx);
@@ -18,15 +18,15 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
     
     //Keccak256 hash of RLP-serialized data
     aether_keccak256_hash tx_hash;
-    aether_keccak256_bhash(&tx_hash, vector_uchar_begin(tx_sig), vector_uchar_size(tx_sig));
+    aether_keccak256_bhash(&tx_hash, aether_vector_uchar_begin(tx_sig), aether_vector_uchar_size(tx_sig));
 
     //Sign our hash using our private key, obtaining our v, r, s values
     struct aether_eth_tx_sig sig;
     aether_secp256k1_ecdsa_sign(&sig, sk, tx_hash.data, tx->sig.v, ctx);
 
     //Finally, add v, r, s and re-encode
-    vector_uchar_clear(tx_sig);
-    struct aether_rlp_t* e = vector_rlp_t_begin(&tx_rlp.value.list) + 6;
+    aether_vector_uchar_clear(tx_sig);
+    struct aether_rlp_t* e = aether_vector_rlp_t_begin(&tx_rlp.value.list) + 6;
     aether_rlp_t_set_byte_array_scalarbytes(e++, sig.v, sig.v + 32);
     aether_rlp_t_set_byte_array_scalarbytes(e++, sig.r, sig.r + 32);
     aether_rlp_t_set_byte_array_scalarbytes(e, sig.s, sig.s + 32);

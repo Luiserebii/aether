@@ -29,7 +29,7 @@ struct aether_eth_tx {
     struct aether_eth_tx_sig sig;
 };
 
-void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, vector_uchar* tx_sig, const secp256k1_context* ctx);
+void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, struct aether_vector_uchar* tx_sig, const secp256k1_context* ctx);
 
 /**
  * Calculate the numerical value {0, 1} using the parity of the y-coordinate.
