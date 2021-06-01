@@ -66,6 +66,8 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     mpz_set_str(p, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
 
     //Perform modular arithmetic to calculate s
+    //Using ECDSA paper suggests line below
+    //mpz_mod(r, r, p);
     mpz_mul(val, r, k);
     mpz_add(val, z, val);
     mpz_invert(q, q, p);

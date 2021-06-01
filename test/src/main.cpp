@@ -43,6 +43,8 @@ TEST_CASE("Testing Struct RLP_T", "[rlp_t]") {
         REQUIRE(rlp.tag == AETHER_RLP_T_BYTE_ARR);
         REQUIRE(vector_uchar_size(&rlp.value.byte_array) == 1);
         REQUIRE(memcmp(vector_uchar_begin(&rlp.value.byte_array), b, 1) == 0);
+
+        aether_rlp_t_deinit(&rlp);
     }
 
     SECTION("430 (a valid scalar)") {
@@ -52,6 +54,8 @@ TEST_CASE("Testing Struct RLP_T", "[rlp_t]") {
         REQUIRE(rlp.tag == AETHER_RLP_T_BYTE_ARR);
         REQUIRE(vector_uchar_size(&rlp.value.byte_array) == 2);
         REQUIRE(memcmp(vector_uchar_begin(&rlp.value.byte_array), b, 2) == 0);
+
+        aether_rlp_t_deinit(&rlp);
     }
 
     SECTION("5907967 (a valid scalar)") {
@@ -61,6 +65,8 @@ TEST_CASE("Testing Struct RLP_T", "[rlp_t]") {
         REQUIRE(rlp.tag == AETHER_RLP_T_BYTE_ARR);
         REQUIRE(vector_uchar_size(&rlp.value.byte_array) == 3);
         REQUIRE(memcmp(vector_uchar_begin(&rlp.value.byte_array), b, 3) == 0);
+        
+        aether_rlp_t_deinit(&rlp);
     }
 
     SECTION("[] (empty list)") {
@@ -457,7 +463,6 @@ TEST_CASE("Testing RLP Encoding", "[rlp_encoding]") {
  * [0x7F, 0x80] | [0xC3, 0x7F, 0x81, 0x80] 
  * [[], [[]], [[], [[]]]] | [0xC7, 0xC0, 0xC1, 0xC0, 0xC3, 0xC0, 0xC1, 0xC0]
  */
-;
 }
 
 
@@ -505,6 +510,7 @@ TEST_CASE("Testing transaction signing", "[tx_sign]") {
         aether_util_writebytestohex(stdout, vector_uchar_begin(&tx_sig), vector_uchar_size(&tx_sig));
         putchar('\n');
 
+        free(bytes);
         vector_uchar_deinit(&tx_sig);
         secp256k1_context_destroy(ctx);
     }

@@ -11,6 +11,9 @@ PRG_OUT=test
 
 test: compile run
 
+memory: compile
+	LD_LIBRARY_PATH=~/github/aether/ valgrind ./$(PRG_OUT)
+
 run:
 	LD_LIBRARY_PATH=~/github/aether/ ./$(PRG_OUT)
 
