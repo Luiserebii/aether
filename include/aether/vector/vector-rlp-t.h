@@ -8,7 +8,7 @@ extern "C" {
 #define CSTL_VECTOR_DECLARE_ONLY
 #include <aether/cstl/vector.h>
 
-declare_vector_class(vector_rlp_t, struct aether_rlp_t)
+declare_vector_class(aether_vector_rlp_t, struct aether_rlp_t)
 
 #ifdef __cplusplus
 }

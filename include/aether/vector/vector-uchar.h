@@ -8,7 +8,7 @@ extern "C" {
 #define CSTL_VECTOR_DECLARE_ONLY
 #include <aether/cstl/vector.h>
 
-declare_vector_class(vector_uchar, unsigned char)
+declare_vector_class(aether_vector_uchar, unsigned char)
 
 #ifdef __cplusplus
 }
