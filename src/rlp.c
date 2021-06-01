@@ -1,16 +1,16 @@
-#include <aether/rlp-parse.h>
+#include <aether-internal/rlp-parse.h>
+#include <aether/eth.h>
 #include <aether/rlp.h>
 #include <aether/tx.h>
-#include <aether/vector-rlp-t.h>
-#include <aether/vector-uchar.h>
-#include <aether/util.h>
+#include <aether/vector/vector-rlp-t.h>
+#include <aether/vector/vector-uchar.h>
+#include <aether-internal/util.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <assert.h>
 #include <ctype.h>
-#include "aether/eth.h"
 
 void aether_rlp_t_init_list(struct aether_rlp_t* t) {
     vector_rlp_t_init(&t->value.list);

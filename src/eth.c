@@ -7,7 +7,7 @@
 #include <ctype.h>
 
 #include <aether/eth.h>
-#include <aether/util.h>
+#include <aether-internal/util.h>
 
 const unsigned char* aether_secp256k1_randskey(aether_secp256k1_seckey* sk) {
     //Fill our raw buffer with CSPRNG bytes from /dev/urandom

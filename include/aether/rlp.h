@@ -5,10 +5,10 @@
 extern "C" {
 #endif
 
-#include "./vector-rlp-t.h"
-#include "./vector-uchar.h"
-#include "./eth.h"
-#include "./tx.h"
+#include <aether/vector/vector-rlp-t.h>
+#include <aether/vector/vector-uchar.h>
+#include <aether/eth.h>
+#include <aether/tx.h>
 
 enum aether_rlp_t_tag { AETHER_RLP_T_LIST, AETHER_RLP_T_BYTE_ARR };
 

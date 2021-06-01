@@ -1,8 +1,9 @@
 #include <aether/tx.h>
-#include <aether/vector-uchar.h>
 #include <aether/eth.h>
 #include <aether/rlp.h>
-#include <aether/util.h>
+#include <aether/vector/vector-uchar.h>
+
+#include <aether-internal/util.h>
 
 #include <string.h>
 

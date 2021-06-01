@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #include <aether/eth.h>
-#include <aether/vector-uchar.h>
+#include <aether/vector/vector-uchar.h>
 
 struct aether_eth_tx_sig {
     unsigned char v[32];

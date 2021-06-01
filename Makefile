@@ -1,4 +1,4 @@
-C_INCLUDE_FLAGS=-I./lib/ethash-0.6.0/include -I./lib/C-STL-master/include -I./build/include
+C_INCLUDE_FLAGS=-I./lib/ethash-0.6.0/include -I./lib/C-STL-master/include -I./include/ -I./src/include/
 LINK_FLAGS=-lsecp256k1 -lm
 CFLAGS= -g3 -Wall -Wextra -Wvla -shared -fPIC $(C_INCLUDE_FLAGS)
 #-Wl,-soname,$(LIB_OUT_NAME).$(LIB_VER)
@@ -13,17 +13,14 @@ LIB_OUT=aether
 LIB_OUT_NAME=lib$(LIB_OUT).so
 
 compile: setup
-	$(CC) $(CFLAGS) ./src/*.c $(DEP_SRC) $(LINK_FLAGS) -o $(LIB_OUT_NAME)
+	$(CC) $(CFLAGS) ./src/*.c ./src/**/*.c $(DEP_SRC) $(LINK_FLAGS) -o $(LIB_OUT_NAME)
 
 static:
 
 setup:
-#	mkdir -p ./include/aether/cstl
-#	cp ./lib/C-STL-master/include/cstl/vector.h ./include/aether/cstl
 	mkdir -p ./build
-	cp -r ./include ./build
-	mkdir -p ./build/include/aether/cstl
-	cp ./lib/C-STL-master/include/cstl/vector.h ./build/include/aether/cstl
+	mkdir -p ./include/aether/cstl
+	cp ./lib/C-STL-master/include/cstl/vector.h ./include/aether/cstl
 
 install: 
 	cp $(LIB_OUT_NAME) /usr/lib

@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include <aether/rlp-parse.h>
+#include <aether-internal/rlp-parse.h>
 #include <cstl/algorithm.h>
 
 void aether_rlp_t_parse_rlp_t(struct aether_rlp_t_parsing_data* pd) {
