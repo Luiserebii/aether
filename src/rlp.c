@@ -152,7 +152,8 @@ void aether_rlp_t_init_tx(struct aether_rlp_t* t, const struct aether_eth_tx* tx
 void aether_rlp_t_set_byte_array_scalarull(struct aether_rlp_t* t, unsigned long long n) {
     aether_vector_uchar_clear(&t->value.byte_array);
     if(!n) {
-        aether_vector_uchar_push_back(&t->value.byte_array, 128U);
+        //TODO: Modify fully to do nothing!
+        //aether_vector_uchar_push_back(&t->value.byte_array, 128U);
     } else {
         aether_vector_uchar_insert_big_endian_bytes(&t->value.byte_array, n);
     }
