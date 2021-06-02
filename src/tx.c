@@ -12,6 +12,33 @@
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 
+void aether_eth_tx_init(struct aether_eth_tx* tx, const char* n, const char* gp, const char* gl, const char* addr, const char* val, const char* dt, const char* cid) {
+    mpz_t nonce, gasprice, gaslimit, address, value, data, chainid;
+    mpz_inits(nonce, gasprice, gaslimit, address, value, data, chainid, NULL);
+    mpz_set_str(nonce, n, 10);
+    mpz_set_str(gasprice, gp, 10);
+    mpz_set_str(gaslimit, gl, 10);
+    mpz_set_str(address, addr, 16);
+    mpz_set_str(value, val, 10);
+    mpz_set_str(chainid, cid, 10);
+
+    size_t dt_sz = strlen(dt);
+    tx->data.sz = dt_sz / 2;
+    tx->data.bytes = calloc(tx->data.sz, 1);
+    aether_util_hexstringtobytes(tx->data.bytes, dt, dt + dt_sz);
+
+    aether_util_mpz_export(tx->nonce, 32, nonce);
+    aether_util_mpz_export(tx->gasprice, 32, gasprice);
+    aether_util_mpz_export(tx->gaslimit, 32, gaslimit);
+    aether_util_mpz_export(tx->to.data, 20, address);
+    aether_util_mpz_export(tx->value, 32, value);
+    aether_util_mpz_export(tx->sig.v, 32, chainid);
+    memset(tx->sig.r, 0, 32);
+    memset(tx->sig.s, 0, 32);
+
+    mpz_clears(nonce, gasprice, gaslimit, address, value, data, chainid, NULL);
+}
+
 void aether_eth_tx_sign(struct aether_vector_uchar* tx_sig, const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, const secp256k1_context* ctx) {
     //Encode transaction as RLP-serialized
     struct aether_rlp_t tx_rlp;
@@ -49,12 +76,15 @@ void aether_eth_tx_calc_v(unsigned char* v, int recoveryid, const unsigned char*
     mpz_clear(v_num);
 }
 
+void aether_eth_tx_deinit(struct aether_eth_tx* tx) {
+    free(tx->data.bytes);
+}
 
 /**
  * Alternative implementations; would be neat to get this working in the future, although unneeded
  */
 
-int aether_secp256k1_pk_y_parity(const unsigned char* pk_y) {
+int aether_secp256k1_pk_y_parity_alt(const unsigned char* pk_y) {
     return aether_util_hexchartouchar(pk_y[31]) % 2 == 0 ? 0 : 1;
 }
 
@@ -63,7 +93,7 @@ void aether_secp256k1_ecdsa_calc_v_alt(unsigned char* v, const unsigned char* pk
     mpz_init(v_num);
     aether_util_mpz_import(v_num, 32, chainid);
     mpz_mul_ui(v_num, v_num, 2);
-    mpz_add_ui(v_num, v_num, 35 + aether_secp256k1_pk_y_parity(pk_y));
+    mpz_add_ui(v_num, v_num, 35 + aether_secp256k1_pk_y_parity_alt(pk_y));
     aether_util_mpz_export(v, 32, v_num);
     mpz_clear(v_num);
 }

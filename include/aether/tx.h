@@ -29,9 +29,13 @@ struct aether_eth_tx {
     struct aether_eth_tx_sig sig;
 };
 
+void aether_eth_tx_init(struct aether_eth_tx* tx, const char* n, const char* gp, const char* gl, const char* addr, const char* val, const char* d, const char* cid);
+
 void aether_eth_tx_sign(struct aether_vector_uchar* tx_sig, const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, const secp256k1_context* ctx);
 
 void aether_eth_tx_calc_v(unsigned char* v, int recoveryid, const unsigned char* chainid);
+
+void aether_eth_tx_deinit(struct aether_eth_tx* tx);
 
 /*********************************************************************************************************
  * Alternative implementations; would be neat to get this working in the future, although unneeded

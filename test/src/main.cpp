@@ -469,6 +469,7 @@ TEST_CASE("Testing RLP Encoding", "[rlp_encoding]") {
 
 TEST_CASE("Testing transaction signing", "[tx_sign]") {
     struct aether_eth_tx tx;
+
     mpz_t nonce, gasprice, gaslimit, addr, value, data, chainid;
     mpz_inits(nonce, gasprice, gaslimit, addr, value, data, chainid, NULL);
     mpz_set_str(nonce, "63", 10);
