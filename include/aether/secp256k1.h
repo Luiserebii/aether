@@ -30,6 +30,8 @@ struct aether_secp256k1_ecdsa_sig {
     int r_id;
 };
 
+void aether_secp256k1_seckey_import(aether_secp256k1_seckey* sk, const char* s);
+
 /**
  * Generates a random secp256k1 secret key. Each byte is guaranteed to be in
  * the range of [0, 2^8-1]. Therefore, the value of the secret key is

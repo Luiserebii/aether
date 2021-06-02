@@ -1,10 +1,17 @@
-#include <sys/random.h>
 #include <assert.h>
+#include <string.h>
+#include <sys/random.h>
 
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 
 #include <aether/secp256k1.h>
+#include <aether-internal/util.h>
+
+void aether_secp256k1_seckey_import(aether_secp256k1_seckey* sk, const char* s) {
+    memset(sk->data, 0, 32);
+    aether_util_hexstringtobytes(sk->data, s, s + strlen(s));
+}
 
 const unsigned char* aether_secp256k1_randskey(aether_secp256k1_seckey* sk) {
     //Fill our raw buffer with CSPRNG bytes from /dev/urandom

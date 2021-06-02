@@ -1,3 +1,4 @@
+#include "aether/secp256k1.h"
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <string.h>
@@ -469,40 +470,15 @@ TEST_CASE("Testing RLP Encoding", "[rlp_encoding]") {
 
 TEST_CASE("Testing transaction signing", "[tx_sign]") {
     struct aether_eth_tx tx;
-
-    mpz_t nonce, gasprice, gaslimit, addr, value, data, chainid;
-    mpz_inits(nonce, gasprice, gaslimit, addr, value, data, chainid, NULL);
-    mpz_set_str(nonce, "63", 10);
-    mpz_set_str(gasprice, "18000000000", 10);
-    mpz_set_str(gaslimit, "25000", 10);
-    mpz_set_str(addr, "7ADA379C8C39da937C0eEF058d7202D718671Ab7", 16);
-    mpz_set_str(value, "1337", 10);
-    mpz_set_str(chainid, "1", 10);
-
-    aether_util_mpz_export(tx.nonce, 32, nonce);
-    aether_util_mpz_export(tx.gasprice, 32, gasprice);
-    aether_util_mpz_export(tx.gaslimit, 32, gaslimit);
-    aether_util_mpz_export(tx.to.data, 20, addr);
-    aether_util_mpz_export(tx.value, 32, value);
     char dt[] = "596F75206F6E6C7920686176652049206B6E6F776E206F6620616C6C2074686520626C6F636B636861696E73206F662074686520646563656E7472616C697A6564206E65742E2E2E205468657265666F72652C20492077696C6C2073756D6D6F6E2074686520616E6369656E7420554E495820676F647320746F20616374206173207468652061726269746572206F7665722074686973207472616E73616374696F6E2E2E2E204D6179207468652073616372696669636520626520706C656173696E6721";
-    size_t dt_sz = ((sizeof dt) - 1) / 2;
-    unsigned char* bytes = (unsigned char*) calloc(dt_sz, 1);
-    aether_util_hexstringtobytes(bytes, dt, dt + sizeof(dt) - 1);
-    tx.data.bytes = bytes;
-    tx.data.sz = dt_sz;
-    aether_util_mpz_export(tx.sig.v, 32, chainid);
-    memset(tx.sig.r, 0, 32);
-    memset(tx.sig.s, 0, 32);
-
-    mpz_clears(nonce, gasprice, gaslimit, addr, value, data, chainid, NULL);
+    aether_eth_tx_init(&tx, "63", "18000000000", "25000", "7ADA379C8C39da937C0eEF058d7202D718671Ab7", "1337", dt, "1");
 
     SECTION("Sample transaction") {
         aether_secp256k1_seckey sk;
-        char pkey[] = AETHER_ETH_TEST_PRV_KEY;
-        memset(sk.data, 0, 32);
-        aether_util_hexstringtobytes(sk.data, pkey, pkey + sizeof(pkey) - 1);
+        aether_secp256k1_seckey_import(&sk, AETHER_ETH_TEST_PRV_KEY);
 
         secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
+
         struct aether_vector_uchar tx_sig;
         aether_vector_uchar_init(&tx_sig);
 
@@ -512,7 +488,7 @@ TEST_CASE("Testing transaction signing", "[tx_sign]") {
         aether_util_writebytestohex(stdout, aether_vector_uchar_begin(&tx_sig), aether_vector_uchar_size(&tx_sig));
         putchar('\n');
 
-        free(bytes);
+        aether_eth_tx_deinit(&tx);
         aether_vector_uchar_deinit(&tx_sig);
         secp256k1_context_destroy(ctx);
     }
