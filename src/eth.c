@@ -1,26 +1,26 @@
-#include <secp256k1.h>
-#include <ethash/keccak.h>
-
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
 
+#include <secp256k1.h>
+#include <ethash/keccak.h>
+
 #include <aether/eth.h>
 #include <aether-internal/util.h>
 
-void aether_keccak256_pkhash(aether_eth_pubkey_khash* kh, const aether_secp256k1_unc_pubkey* pk) {
+void aether_eth_pkhash_from_pk(aether_eth_pkhash* kh, const aether_secp256k1_unc_pubkey* pk) {
     //Grab the pointer up from the public key, as we ignore the first uncompressed byte
     const unsigned char* pk_data = pk->data + 1;
     aether_keccak256_bhash(kh, pk_data, 64);
 }
 
-const unsigned char* aether_eth_pubkey_khash_getaddress(const aether_eth_pubkey_khash* kh) {
+const unsigned char* aether_eth_pkhash_getaddress(const aether_eth_pkhash* kh) {
     return kh->data+12;
 }
 
-void aether_eth_pubkey_khash_writeeip55address(FILE* stream, const aether_eth_pubkey_khash* kh) {
+void aether_eth_pkhash_writeeip55address(FILE* stream, const aether_eth_pkhash* kh) {
     char loweraddr[41];
-    aether_util_bytestohexstring(loweraddr, aether_eth_pubkey_khash_getaddress(kh), 20);
+    aether_util_bytestohexstring(loweraddr, aether_eth_pkhash_getaddress(kh), 20);
     aether_util_tolowerstr(loweraddr);    
 
     //Hash the lowercase address
@@ -39,8 +39,8 @@ void aether_eth_pubkey_khash_writeeip55address(FILE* stream, const aether_eth_pu
     }
 }
 
-void aether_eth_pubkey_khash_eip55addresstostring(char* out, const aether_eth_pubkey_khash* kh) {
-    aether_util_bytestohexstring(out, aether_eth_pubkey_khash_getaddress(kh), 20);
+void aether_eth_pkhash_eip55addresstostring(char* out, const aether_eth_pkhash* kh) {
+    aether_util_bytestohexstring(out, aether_eth_pkhash_getaddress(kh), 20);
     aether_util_tolowerstr(out);
 
     //Hash the lowercase address

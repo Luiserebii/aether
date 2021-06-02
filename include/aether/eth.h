@@ -15,7 +15,7 @@ extern "C" {
  * As this is a special kind of a keccak256 hash, it is typedef'd to express 
  * the unique functions this data type has (e.g. getting address)
  */
-typedef aether_keccak256_hash aether_eth_pubkey_khash;
+typedef aether_keccak256_hash aether_eth_pkhash;
 
 /**
  * Ethereum address data type.
@@ -27,25 +27,25 @@ typedef struct {
 /**
  * Calculates the keccak256 hash from a public key. 
  **/
-void aether_keccak256_pkhash(aether_eth_pubkey_khash* kh, const aether_secp256k1_unc_pubkey* pk);
+void aether_eth_pkhash_from_pk(aether_eth_pkhash* kh, const aether_secp256k1_unc_pubkey* pk);
 
 /**
  * Returns a pointer to the 20-byte segment containing a valid Ethereum address
  * from public key keccak256 hash.
  */
-const unsigned char* aether_eth_pubkey_khash_getaddress(const aether_eth_pubkey_khash* kh);
+const unsigned char* aether_eth_pkhash_getaddress(const aether_eth_pkhash* kh);
 
 /**
  * Writes 40 characters to the stream, the EIP-55 encoded address of the public key.
  */
-void aether_eth_pubkey_khash_writeeip55address(FILE* stream, const aether_eth_pubkey_khash* kh);
+void aether_eth_pkhash_writeeip55address(FILE* stream, const aether_eth_pkhash* kh);
 
 /**
  * Writes 41 characters to out, the EIP-55 encoded address of the public key and a
  * null terminator. Note that this function could very well overrun out: **PLEASE**
  * ensure that the out buffer can store them.
  */
-void aether_eth_pubkey_khash_eip55addresstostring(char* out, const aether_eth_pubkey_khash* kh);
+void aether_eth_pkhash_eip55addresstostring(char* out, const aether_eth_pkhash* kh);
 
 /**
  * Returns non-zero if the address is empty.

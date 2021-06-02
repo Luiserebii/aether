@@ -39,7 +39,6 @@ void aether_eth_tx_sign(struct aether_vector_uchar* tx_sig, const struct aether_
     aether_rlp_t_deinit(&tx_rlp);
 }
 
-
 void aether_eth_tx_calc_v(unsigned char* v, int recoveryid, const unsigned char* chainid) {
     mpz_t v_num;
     mpz_init(v_num);
@@ -50,27 +49,6 @@ void aether_eth_tx_calc_v(unsigned char* v, int recoveryid, const unsigned char*
     mpz_clear(v_num);
 }
 
-void aether_secp256k1_ecdsa_sign(struct aether_secp256k1_ecdsa_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data32, const secp256k1_context* ctx) {
-    secp256k1_ecdsa_recoverable_signature r_sig;
-    secp256k1_nonce_function nfn = secp256k1_nonce_function_rfc6979;
-    secp256k1_ecdsa_sign_recoverable(ctx, &r_sig, data32, sk->data, nfn, NULL);
-
-    secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, sig->rs, &sig->r_id, &r_sig);
-}
-
-int aether_secp256k1_ecdsa_recover(aether_secp256k1_unc_pubkey* pk, const struct aether_secp256k1_ecdsa_sig* sig, const unsigned char* data32, const secp256k1_context* ctx) {
-    secp256k1_pubkey s_pk;
-    secp256k1_ecdsa_recoverable_signature s_sig;
-    secp256k1_ecdsa_recoverable_signature_parse_compact(ctx, &s_sig, sig->rs, sig->r_id);
-
-    int res = secp256k1_ecdsa_recover(ctx, &s_pk, &s_sig, data32);
-    if(!res) {
-        return 0;
-    } 
-    size_t sz = 65;
-    secp256k1_ec_pubkey_serialize(ctx, pk->data, &sz, &s_pk, SECP256K1_EC_UNCOMPRESSED); 
-    return 1;
-}
 
 /**
  * Alternative implementations; would be neat to get this working in the future, although unneeded
@@ -96,7 +74,7 @@ void aether_secp256k1_ecdsa_sign_alt(struct aether_eth_tx_sig* sig, const aether
     aether_secp256k1_genskey(&eph_sk, ctx);
 
     aether_secp256k1_unc_pubkey eph_pk;
-    aether_secp256k1_calcpkey(&eph_pk, ctx, &eph_sk);
+    aether_secp256k1_ecdsa_pubkey(&eph_pk, ctx, &eph_sk);
     
     //Set up values for modular arithmetic
     mpz_t q, r, k, z, p, s, val;
