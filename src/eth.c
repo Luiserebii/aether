@@ -1,4 +1,3 @@
-#include <sys/random.h>
 #include <secp256k1.h>
 #include <ethash/keccak.h>
 
@@ -8,38 +7,6 @@
 
 #include <aether/eth.h>
 #include <aether-internal/util.h>
-
-const unsigned char* aether_secp256k1_randskey(aether_secp256k1_seckey* sk) {
-    //Fill our raw buffer with CSPRNG bytes from /dev/urandom
-    getrandom(sk->data, 32, 0);
-    //Mask off all unneeded bytes
-    for(size_t i = 0; i < 32; ++i) {
-        sk->data[i] &= 0xFF;
-    }
-    return sk->data;
-}
-
-void aether_secp256k1_genskey(aether_secp256k1_seckey* sk, const secp256k1_context* ctx) {
-    //Generate a new one until valid
-    while(!secp256k1_ec_seckey_verify(ctx, aether_secp256k1_randskey(sk)))
-        ;
-}
-
-void aether_secp256k1_calcpkey(aether_secp256k1_unc_pubkey* pk, const secp256k1_context* ctx, const aether_secp256k1_seckey* sk) {
-    //Generate public key
-    secp256k1_pubkey secp_pubkey;
-    int pkcres = secp256k1_ec_pubkey_create(ctx, &secp_pubkey, sk->data);
-    assert(pkcres);
-
-    //Write secp256k1 public key to uncompressed 65-bit representation
-    size_t outputlen = 65;
-    secp256k1_ec_pubkey_serialize(ctx, pk->data, &outputlen, &secp_pubkey, SECP256K1_EC_UNCOMPRESSED);
-}
-
-void aether_keccak256_bhash(aether_keccak256_hash* kh, const unsigned char* data, size_t sz) {
-    union ethash_hash256 ehash = ethash_keccak256(data, sz);
-    memcpy(kh->data, ehash.str, 32);
-}
 
 void aether_keccak256_pkhash(aether_eth_pubkey_khash* kh, const aether_secp256k1_unc_pubkey* pk) {
     //Grab the pointer up from the public key, as we ignore the first uncompressed byte

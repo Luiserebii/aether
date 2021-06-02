@@ -6,28 +6,8 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <secp256k1.h>
-
-/**
- * secp256k1 secret key data type.
- */
-typedef struct {
-    unsigned char data[32];
-} aether_secp256k1_seckey;
-
-/**
- * secp256k1 uncompressed public key data type.
- */
-typedef struct {
-    unsigned char data[65];
-} aether_secp256k1_unc_pubkey;
-
-/**
- * secp256k1 keccak256 hash data type.
- */
-typedef struct {
-    unsigned char data[32];
-} aether_keccak256_hash;
+#include <aether/secp256k1.h>
+#include <aether/keccak256.h>
 
 /**
  * Ethereum keccak256 hash of public key data type. 
@@ -43,33 +23,6 @@ typedef aether_keccak256_hash aether_eth_pubkey_khash;
 typedef struct {
     unsigned char data[20];
 } aether_eth_address;
-
-/**
- * Generates a random secp256k1 secret key. Each byte is guaranteed to be in
- * the range of [0, 2^8-1]. Therefore, the value of the secret key is
- * guaranteed to be in the range of [0, 2^32-1].
- *
- * Note that this does not guarantee a *valid* random secp256k1 key.
- * See aether_secp256k1_genskey.
- */
-const unsigned char* aether_secp256k1_randskey(aether_secp256k1_seckey* sk);
-
-/**
- * Generates a random valid secp256k1 secret key. The value of the secret key
- * is guaranteed to be in the valid range, which is [1, order n of G].
- */
-void aether_secp256k1_genskey(aether_secp256k1_seckey* sk, const secp256k1_context* ctx);
-
-/**
- * Calculates the uncompressed secp256k1 public key from a secret key.
- * A secp256k1_context pointer is required.
- */
-void aether_secp256k1_calcpkey(aether_secp256k1_unc_pubkey* pk, const secp256k1_context* ctx, const aether_secp256k1_seckey* sk);
-
-/**
- * Calculates the keccak256 hash from any arbitrary data, reading sz bytes.
- */
-void aether_keccak256_bhash(aether_keccak256_hash* kh, const unsigned char* data, size_t sz);
 
 /**
  * Calculates the keccak256 hash from a public key. 

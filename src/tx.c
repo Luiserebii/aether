@@ -2,6 +2,7 @@
 #include <aether/eth.h>
 #include <aether/rlp.h>
 #include <aether/vector/vector-uchar.h>
+#include <aether/secp256k1.h>
 
 #include <aether-internal/util.h>
 
@@ -11,7 +12,7 @@
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 
-void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, struct aether_vector_uchar* tx_sig, const secp256k1_context* ctx) {
+void aether_eth_tx_sign(struct aether_vector_uchar* tx_sig, const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, const secp256k1_context* ctx) {
     //Encode transaction as RLP-serialized
     struct aether_rlp_t tx_rlp;
     aether_rlp_t_init_tx(&tx_rlp, tx);
@@ -22,13 +23,10 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
     aether_keccak256_bhash(&tx_hash, aether_vector_uchar_begin(tx_sig), aether_vector_uchar_size(tx_sig));
 
     //Sign our hash using our private key, obtaining our v, r, s values
-/*    struct aether_eth_tx_sig sig;
-    aether_secp256k1_ecdsa_sign(&sig, sk, tx_hash.data, tx->sig.v, ctx);
-*/
     struct aether_secp256k1_ecdsa_sig sig;
-    aether_secp256k1_ecdsa_sign_alt(&sig, sk, tx_hash.data, ctx);
+    aether_secp256k1_ecdsa_sign(&sig, sk, tx_hash.data, ctx);
     unsigned char v[32];
-    aether_secp256k1_ecdsa_calc_v_alt(v, sig.r_id, tx->sig.v);
+    aether_eth_tx_calc_v(v, sig.r_id, tx->sig.v);
 
     //Finally, add v, r, s and re-encode
     aether_vector_uchar_clear(tx_sig);
@@ -36,19 +34,13 @@ void aether_eth_tx_sign(const struct aether_eth_tx* tx, const aether_secp256k1_s
     aether_rlp_t_set_byte_array_scalarbytes(e++, v, v + 32);
     aether_rlp_t_set_byte_array_scalarbytes(e++, sig.rs, sig.rs + 32);
     aether_rlp_t_set_byte_array_scalarbytes(e, sig.rs + 32, sig.rs + 64);
-/*    aether_rlp_t_set_byte_array_scalarbytes(e++, sig.v, sig.v + 32);
-    aether_rlp_t_set_byte_array_scalarbytes(e++, sig.r, sig.r + 32);
-    aether_rlp_t_set_byte_array_scalarbytes(e, sig.s, sig.s + 32);
-*/
+    
     aether_rlp_t_encode(&tx_rlp, tx_sig);
     aether_rlp_t_deinit(&tx_rlp);
 }
 
-int aether_secp256k1_pk_y_parity(const unsigned char* pk_y) {
-    return aether_util_hexchartouchar(pk_y[31]) % 2 == 0 ? 0 : 1;
-}
 
-void aether_secp256k1_ecdsa_calc_v_alt(unsigned char* v, int recoveryid, const unsigned char* chainid) {
+void aether_eth_tx_calc_v(unsigned char* v, int recoveryid, const unsigned char* chainid) {
     mpz_t v_num;
     mpz_init(v_num);
     aether_util_mpz_import(v_num, 32, chainid);
@@ -58,7 +50,37 @@ void aether_secp256k1_ecdsa_calc_v_alt(unsigned char* v, int recoveryid, const u
     mpz_clear(v_num);
 }
 
-void aether_secp256k1_ecdsa_calc_v(unsigned char* v, const unsigned char* pk_y, const unsigned char* chainid) {
+void aether_secp256k1_ecdsa_sign(struct aether_secp256k1_ecdsa_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data32, const secp256k1_context* ctx) {
+    secp256k1_ecdsa_recoverable_signature r_sig;
+    secp256k1_nonce_function nfn = secp256k1_nonce_function_rfc6979;
+    secp256k1_ecdsa_sign_recoverable(ctx, &r_sig, data32, sk->data, nfn, NULL);
+
+    secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, sig->rs, &sig->r_id, &r_sig);
+}
+
+int aether_secp256k1_ecdsa_recover(aether_secp256k1_unc_pubkey* pk, const struct aether_secp256k1_ecdsa_sig* sig, const unsigned char* data32, const secp256k1_context* ctx) {
+    secp256k1_pubkey s_pk;
+    secp256k1_ecdsa_recoverable_signature s_sig;
+    secp256k1_ecdsa_recoverable_signature_parse_compact(ctx, &s_sig, sig->rs, sig->r_id);
+
+    int res = secp256k1_ecdsa_recover(ctx, &s_pk, &s_sig, data32);
+    if(!res) {
+        return 0;
+    } 
+    size_t sz = 65;
+    secp256k1_ec_pubkey_serialize(ctx, pk->data, &sz, &s_pk, SECP256K1_EC_UNCOMPRESSED); 
+    return 1;
+}
+
+/**
+ * Alternative implementations; would be neat to get this working in the future, although unneeded
+ */
+
+int aether_secp256k1_pk_y_parity(const unsigned char* pk_y) {
+    return aether_util_hexchartouchar(pk_y[31]) % 2 == 0 ? 0 : 1;
+}
+
+void aether_secp256k1_ecdsa_calc_v_alt(unsigned char* v, const unsigned char* pk_y, const unsigned char* chainid) {
     mpz_t v_num;
     mpz_init(v_num);
     aether_util_mpz_import(v_num, 32, chainid);
@@ -68,15 +90,7 @@ void aether_secp256k1_ecdsa_calc_v(unsigned char* v, const unsigned char* pk_y, 
     mpz_clear(v_num);
 }
 
-void aether_secp256k1_ecdsa_sign_alt(struct aether_secp256k1_ecdsa_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const secp256k1_context* ctx) {
-    secp256k1_ecdsa_recoverable_signature r_sig;
-    secp256k1_nonce_function nfn = secp256k1_nonce_function_rfc6979;
-    secp256k1_ecdsa_sign_recoverable(ctx, &r_sig, data, sk->data, nfn, NULL);
-
-    secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, sig->rs, &sig->r_id, &r_sig);
-}
-
-void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const unsigned char* chainid, const secp256k1_context* ctx) {
+void aether_secp256k1_ecdsa_sign_alt(struct aether_eth_tx_sig* sig, const aether_secp256k1_seckey* sk, const unsigned char* data, const unsigned char* chainid, const secp256k1_context* ctx) {
     //Generation of ephemeral private and public keys
     aether_secp256k1_seckey eph_sk;
     aether_secp256k1_genskey(&eph_sk, ctx);
@@ -103,7 +117,7 @@ void aether_secp256k1_ecdsa_sign(struct aether_eth_tx_sig* sig, const aether_sec
     mpz_mod(s, val, p);
 
     //Set v, r, (and s?)
-    aether_secp256k1_ecdsa_calc_v(sig->v, eph_pk.data + 32 + 1, chainid);
+    aether_secp256k1_ecdsa_calc_v_alt(sig->v, eph_pk.data + 32 + 1, chainid);
     memcpy(sig->r, eph_pk.data + 1, 32);
     aether_util_mpz_export(sig->s, 32, s);
 

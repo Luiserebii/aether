@@ -471,12 +471,12 @@ TEST_CASE("Testing transaction signing", "[tx_sign]") {
     struct aether_eth_tx tx;
     mpz_t nonce, gasprice, gaslimit, addr, value, data, chainid;
     mpz_inits(nonce, gasprice, gaslimit, addr, value, data, chainid, NULL);
-    mpz_set_str(nonce, "0", 10);
-    mpz_set_str(gasprice, "1000000000", 10);
-    mpz_set_str(gaslimit, "81000", 10);
+    mpz_set_str(nonce, "63", 10);
+    mpz_set_str(gasprice, "18000000000", 10);
+    mpz_set_str(gaslimit, "25000", 10);
     mpz_set_str(addr, "7ADA379C8C39da937C0eEF058d7202D718671Ab7", 16);
-    mpz_set_str(value, "1000000000000000000", 10);
-    mpz_set_str(chainid, "4", 10);
+    mpz_set_str(value, "1337", 10);
+    mpz_set_str(chainid, "1", 10);
 
     aether_util_mpz_export(tx.nonce, 32, nonce);
     aether_util_mpz_export(tx.gasprice, 32, gasprice);
@@ -505,7 +505,7 @@ TEST_CASE("Testing transaction signing", "[tx_sign]") {
         struct aether_vector_uchar tx_sig;
         aether_vector_uchar_init(&tx_sig);
 
-        aether_eth_tx_sign(&tx, &sk, &tx_sig, ctx);
+        aether_eth_tx_sign(&tx_sig, &tx, &sk, ctx);
 
         //Let's just do it here, give us our RLP-encoded+signed tx asap
         aether_util_writebytestohex(stdout, aether_vector_uchar_begin(&tx_sig), aether_vector_uchar_size(&tx_sig));
