@@ -473,7 +473,7 @@ TEST_CASE("Testing transaction signing", "[tx_sign]") {
     mpz_inits(nonce, gasprice, gaslimit, addr, value, data, chainid, NULL);
     mpz_set_str(nonce, "0", 10);
     mpz_set_str(gasprice, "1000000000", 10);
-    mpz_set_str(gaslimit, "21000", 10);
+    mpz_set_str(gaslimit, "81000", 10);
     mpz_set_str(addr, "7ADA379C8C39da937C0eEF058d7202D718671Ab7", 16);
     mpz_set_str(value, "1000000000000000000", 10);
     mpz_set_str(chainid, "4", 10);
