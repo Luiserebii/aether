@@ -32,12 +32,36 @@ struct aether_eth_tx {
     struct aether_eth_tx_sig sig;
 };
 
+/**
+ * Initializes an aether_eth_tx using the fields specified as null-terminated strings, where:
+ *    * n, gp, gl, val, cid are decimal scalar values
+ *    * addr, d are hexadecimal scalar values (with no "0x" prefix)
+ *
+ * Note that although this function allocates memory for data->bytes, and thus aether_eth_tx_deinit
+ * must be called in order to release the proper resources, it is not necessary to use this 
+ * initialization function to bring the struct to a valid state. Simply ensuring that the fields
+ * contain valid accessible data is fine enough. This function is really only useful when naively
+ * redirecting string input into a transaction; when values are being calculated, such as the nonce,
+ * it is more useful to write a function to write into aether_eth_tx directly, to avoid unneeded
+ * conversions.
+ */
 void aether_eth_tx_init(struct aether_eth_tx* tx, const char* n, const char* gp, const char* gl, const char* addr, const char* val, const char* d, const char* cid);
 
+/**
+ * Signs an aether_eth_tx by providing the v, r, s values in tx_sig, using EIP-155. Please note that
+ * tx->sig.v is required to contain the chain ID before calling.
+ */
 void aether_eth_tx_sign(struct aether_vector_uchar* tx_sig, const struct aether_eth_tx* tx, const aether_secp256k1_seckey* sk, const secp256k1_context* ctx);
 
+/**
+ * Calculates a valid v using the recovery id (a value {0, 1} representing the parity
+ * of the y-coordinate of the ephemeral public key) and a chain ID.
+ */
 void aether_eth_tx_calc_v(unsigned char* v, int recoveryid, const unsigned char* chainid);
 
+/**
+ * Deinitializes an aether_eth_tx by releasing memory allocated by aether_eth_tx_init.
+ */
 void aether_eth_tx_deinit(struct aether_eth_tx* tx);
 
 /*********************************************************************************************************
