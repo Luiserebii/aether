@@ -15,6 +15,9 @@ struct aether_eth_tx_sig {
 };
 
 /**
+ * The Ethereum transaction data representation. The `data` field is synonymous
+ * with `init` when used for contract creation, serving the same purpose and
+ * location in encoding.
  */
 struct aether_eth_tx {
     unsigned char nonce[32];

@@ -1,7 +1,7 @@
 ---
 Language:        Cpp
 AccessModifierOffset: -2 # Was -1, doubling this to mimick Google's offset logic
-AlignAfterOpenBracket: Align 
+AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlinesLeft: true
@@ -35,7 +35,7 @@ BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Attach 
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false 
-ColumnLimit:     120
+ColumnLimit:     100
 CommentPragmas:  '^[^ ]' # Don't mess with comments that start with chars other than space, e.g. no space after comment delimiter
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 4 

@@ -71,8 +71,9 @@ void aether_rlp_t_init_byte_array_scalarull(struct aether_rlp_t* t, unsigned lon
 void aether_rlp_t_init_byte_array_scalarbytes(struct aether_rlp_t* t, const unsigned char* first, const unsigned char* last);
 
 /**
- *
- *
+ * Initialize a aether_rlp_t as a byte_array (B) with an aether_eth_address.
+ * This uses the encoding as specified in the Ethereum yellowpaper, where a
+ * zero address is simply an empty byte array (B0).
  */
 void aether_rlp_t_init_byte_array_address(struct aether_rlp_t* t, const aether_eth_address* addr);
 
@@ -86,6 +87,7 @@ void aether_rlp_t_init_from_string(struct aether_rlp_t* t, const char* rlp_str);
  * Initialize a aether_rlp_t from a string formatted under the following rules:
  *    * [] represents the delimiters of a list
  *    * 0x represents the prefix delimiter of a byte array
+ *    * Numerical digits in decimal represent a scalar
  *    * Spaces must not be avaliable at the beginning or the end of the string.
  *      *rlp_str_b and *rlp_str_e must be delimiters or non-whitespace 
  *      characters.
@@ -99,11 +101,13 @@ void aether_rlp_t_init_from_string(struct aether_rlp_t* t, const char* rlp_str);
  *    * [] (Empty list)
  *    * 0x (Empty byte array)
  *    * [0xA194,[],[[],0x293821B,0x843CA] 
+ *    * [0,124,0x,0x129A] 
  */
 void aether_rlp_t_init_from_string_range(struct aether_rlp_t* t, const char* rlp_str_b, const char* rlp_str_e);
 
 /**
- * 
+ * Initializes a aether_rlp_t using a constructed aether_eth_tx, i.e., using a 
+ * transaction.
  */
 void aether_rlp_t_init_tx(struct aether_rlp_t* t, const struct aether_eth_tx* tx);
 
